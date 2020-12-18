@@ -12,6 +12,8 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import * as actions from '../store/actions/auth';
+import { connect } from 'react-redux';
 
 function Copyright() {
   return (
@@ -47,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function SignIn() {
+function SignIn() {
   const classes = useStyles();
 
   return (
@@ -117,3 +119,11 @@ export default function SignIn() {
     </Container>
   );
 }
+
+const mapDispatchToProps = dispatch => {
+  return {
+    signIn: (email,password) => dispatch(actions.authLogin(email,password))
+  }
+}
+
+export default connect(null, mapDispatchToProps)(SignIn);

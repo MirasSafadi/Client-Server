@@ -1,31 +1,59 @@
+// import { useState } from 'react';
 import './App.css';
 import SignIn from './pages/Signin';
 import SignUp from './pages/Signup';
 import Home from './pages/Home';
-import { Route } from 'react-router-dom';
+import Computers from './pages/Computers';
+import Phones from './pages/Phones';
+import { Route, Switch, withRouter } from 'react-router-dom';
+// import { Redirect, Route, Switch, Link, withRouter } from 'react-router-dom';
 import HOC from './HOC/hoc';
+import * as actions from './store/actions/auth';
+import { connect } from 'react-redux';
+import Navbar from './components/Navbar';
+import AuthRouter from './authRouter';
+
+// import Button from '@material-ui/core/Button';
 
 
 
-function App() {
+
+function App(props) {
+  // const [ isAuthenticated, setIsAuthenticated ] = useState(false);
+
   return (
-
-    // <div className="App">
-    //     <img src={logo} className="App-logo" alt="logo" />
-    //     <SignIn />
-    // </div>
     <HOC>
-      <Route exact path="/" >
-        <Home />
-      </Route>
-      <Route path="/login" >
-        <SignIn />
-      </Route>
-      <Route path="/signup" >
-        <SignUp />
-      </Route>
+      <Navbar />
+
+      <Switch>
+        <Route exact path="/login" >
+          <SignIn />
+        </Route>
+        <Route exact path="/signup" >
+          <SignUp />
+        </Route>
+        <Route exact path="/computers" >
+          <Computers />
+        </Route>
+        <Route exact path="/phones" >
+          <Phones />
+        </Route>
+        <AuthRouter path="/" Component={<Home />} />
+      </Switch>
     </HOC>
   );
 }
 
-export default App;
+// const mapStateToProps = state => {
+//   return {
+//     isAuthenticated: state.token !== null
+//   }
+// }
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onTryAutoSignup: () => dispatch(actions.authCheckState())
+  }
+}
+//add mapStateToProps
+export default withRouter(connect(null, mapDispatchToProps)(App));
