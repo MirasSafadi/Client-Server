@@ -25,21 +25,21 @@ export default function Navbar() {
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar variant="dense">
-          <Link exact to="/" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
+          <Link to="/" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
               <Button variant="text" color="inherit">
                 <Typography variant="button" color="inherit">
                   Dashboard
                 </Typography>
               </Button>
           </Link>
-          <Link exact to="/computers" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
+          <Link to="/computers" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
               <Button variant="text" color="inherit">
                 <Typography variant="button" color="inherit">
                   Computers
                 </Typography>
               </Button>
           </Link>
-          <Link exact to="/phones" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
+          <Link to="/phones" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
               <Button variant="text" color="inherit">
                 <Typography variant="button" color="inherit">
                   Phones

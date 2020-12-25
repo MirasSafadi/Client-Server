@@ -3,8 +3,6 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
@@ -14,6 +12,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import * as actions from '../store/actions/auth';
 import { connect } from 'react-redux';
+import ReCAPTCHA from "react-google-recaptcha";
+
+const TEST_SITE_KEY = "6LeoExQaAAAAAGwiyrmrZa3e6lwmmUj726tqSs_t";
+const DELAY = 1500;
 
 function Copyright() {
   return (
@@ -50,6 +52,26 @@ const useStyles = makeStyles((theme) => ({
 
 function SignUp() {
   const classes = useStyles();
+  
+  const [value, setValue] = React.useState("[empty]");
+  const [load, setload] = React.useState(false);
+  const [expired, setExpired] = React.useState("false");
+
+  
+
+  React.useEffect(() =>{
+    setTimeout(() => {
+      setload(true);
+    }, DELAY);
+  }, []);
+
+  const handleCAPTCHAChange = cValue => {
+    console.log("Captcha value:", cValue);
+    setValue(cValue);
+    // if value is null recaptcha expired
+    if (cValue === null) 
+      setExpired("true");
+  };
 
   return (
     <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
@@ -110,10 +132,13 @@ function SignUp() {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                label="I want to receive inspiration, marketing promotions and updates via email."
+            {load && (
+              <ReCAPTCHA
+                theme="light"
+                sitekey={TEST_SITE_KEY}
+                onChange={handleCAPTCHAChange}
               />
+            )}
             </Grid>
           </Grid>
           <Button
