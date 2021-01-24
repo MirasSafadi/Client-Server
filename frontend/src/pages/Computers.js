@@ -5,9 +5,16 @@ import '../App.css';
 import Button from '@material-ui/core/Button';
 import { withRouter } from 'react-router-dom';
 
+import UserContext from '../context/user-context';
+
+
+
 
 class Computers extends React.Component{
+    static contextType = UserContext;
+
     render(){
+        const { user, setUser } = this.context
         return (
             <div className="App">
                 <img src={logo} className="App-logo" alt="logo" />

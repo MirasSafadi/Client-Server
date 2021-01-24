@@ -14,6 +14,9 @@ import * as actions from '../store/actions/auth';
 import { connect } from 'react-redux';
 import ReCAPTCHA from "react-google-recaptcha";
 import { withRouter } from "react-router-dom";
+import UserContext from '../context/user-context';
+
+
 
 const TEST_SITE_KEY = "6LeoExQaAAAAAGwiyrmrZa3e6lwmmUj726tqSs_t";
 const DELAY = 1500;
@@ -52,6 +55,8 @@ const useStyles = theme => ({
 });
 
 class SignUp extends React.Component {
+  static contextType = UserContext;
+
   constructor(props){
     super(props);
     this.state = {
@@ -111,6 +116,7 @@ class SignUp extends React.Component {
   }
   render(){
     const { classes } = this.props;
+    const { user, setUser } = this.context
     return (
       <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
         <CssBaseline />
@@ -220,4 +226,5 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-export default withStyles(useStyles)(connect(null, mapDispatchToProps)(withRouter(SignUp)));
+// export default withStyles(useStyles)(connect(null, mapDispatchToProps)(withRouter(SignUp)));
+export default withStyles(useStyles)(withRouter(SignUp));

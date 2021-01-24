@@ -15,6 +15,9 @@ import Container from '@material-ui/core/Container';
 import * as actions from '../store/actions/auth';
 import { withRouter } from "react-router-dom";
 import { connect } from 'react-redux';
+import UserContext from '../context/user-context';
+import axios from 'axios';
+import * as cookies from '../utils/cookies';
 
 function Copyright() {
   return (
@@ -50,6 +53,9 @@ const useStyles = theme => ({
 })
 
 class SignIn extends React.Component{
+  static contextType = UserContext;
+
+
   constructor(props){
     super(props);
     this.state = {
@@ -60,9 +66,10 @@ class SignIn extends React.Component{
     this.handleChange = this.handleChange.bind(this);
     this.submitForm = this.submitForm.bind(this);
   }
+
   componentDidMount(){
-    console.log(this.props.history.length)
   }
+
   handleChange(event){
     let name = event.target.name;
     let value = event.target.value;
@@ -75,18 +82,38 @@ class SignIn extends React.Component{
     event.preventDefault();
     let email = this.state.email;
     let password = this.state.password;
+    let rememberMe = this.state.rememberMe;
+    console.log(rememberMe, typeof rememberMe);
     if(email === '' || password === ''){
       alert('One or more of the fields is missing!');
       return;
     }
-    this.props.authLogin(email,password);
-    //push history to homepage.
-    console.log('here');
-    this.props.history.push('/');
+    // this.props.authLogin(email,password,rememberMe);
+    axios.post('http://localhost:8000/users/login/', {
+        email: email,
+        password: password
+    })
+    .then(res => {
+        const token = res.data.token;
+        const user = res.data.user;
+        if(rememberMe === 'true'){
+            localStorage.setItem('token', token);
+        } else{
+            cookies.setCookie('token',token, 0.5);
+        }
+        const name = user.first_name + ' ' + user.last_name;
+        this.context.setUser({name: name, isAuthenticated: true});
+        //push history to homepage.
+        this.props.history.push('/');
+    })
+    .catch(err => {
+        console.log(err)
+    });
   }
 
   render(){
     const { classes } = this.props;
+    const { user, setUser } = this.context
     return (
       <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
         <CssBaseline />
@@ -123,7 +150,7 @@ class SignIn extends React.Component{
               onChange = {this.handleChange}
             />
             <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
+              control={<Checkbox value={true} color="primary" />}
               label="Remember me"
               name="rememberMe"
               onChange = {this.handleChange}
@@ -157,9 +184,6 @@ class SignIn extends React.Component{
           <Copyright />
         </Box>
         <br/>
-        <Button variant="contained" color="primary" onClick={()=> this.props.history.push('/')}>
-                    go back 
-                </Button>
       </Container>
     );
   }
@@ -177,4 +201,5 @@ const mapStateToProps = state => {
   }
 }
 
-export default withStyles(useStyles)(connect(mapStateToProps,mapDispatchToProps)((withRouter(SignIn))));
+// export default withStyles(useStyles)(connect(mapStateToProps,mapDispatchToProps)((withRouter(SignIn))));
+export default withStyles(useStyles)((withRouter(SignIn)));

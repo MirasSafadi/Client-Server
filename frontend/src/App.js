@@ -12,21 +12,24 @@ import HOC from './HOC/hoc';
 import { connect } from 'react-redux';
 import Navbar from './components/Navbar';
 import AuthRouter from './authRouter';
-
-
+import UserContext from './context/user-context';
 
 
 class App extends React.Component{
+  static contextType = UserContext;
 
   componentDidMount(){
     // console.log(localStorage.getItem('token'))
     // console.log(this.props.isAuthenticated);
+    const user = this.context
+    console.log(user) // { name: null, isAuthenticated: false }
   }
 
   render(){
+    const { user, setUser } = this.context
     return (
       <HOC>
-        <Navbar isAuthenticated={this.props.isAuthenticated} />
+        <Navbar isAuthenticated={user.isAuthenticated} />
         <Switch>
           <Route exact path="/login/" >
             <SignIn />
@@ -49,7 +52,7 @@ class App extends React.Component{
           {/* <AuthRouter path="/" >
             <Home />
           </AuthRouter> */}
-          <AuthRouter isAuthenticated={this.props.isAuthenticated} path="/" >
+          <AuthRouter isAuthenticated={user.isAuthenticated} path="/" >
             <Home />
           </AuthRouter>
         </Switch>
@@ -66,4 +69,5 @@ const mapStateToProps = state => {
 }
 
 
-export default withRouter(connect(mapStateToProps)(App));
+// export default withRouter(connect(mapStateToProps)(App));
+export default withRouter(App);

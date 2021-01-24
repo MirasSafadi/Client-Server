@@ -37,9 +37,9 @@ router.post('/login/', (req, res, next) => {
           email: email,
           password: hashed_password,
         };
-        res.json({token: generateJWTToken(user_info), user: { first_name: result.first_name, last_name: result.last_name }});
+        res.status(200).json({token: generateJWTToken(user_info), user: { first_name: result.first_name, last_name: result.last_name }});
       } else{
-        res.json({error: 'Cannot login with provided credentials'})
+        res.status(406).json({error: 'Cannot login with provided credentials'})
       }
       db.close();
     });

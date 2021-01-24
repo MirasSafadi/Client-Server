@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -7,6 +7,7 @@ import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../store/actions/auth';
+import UserContext from '../context/user-context';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,8 +24,8 @@ const useStyles = makeStyles((theme) => ({
 export default function Navbar(props) {
   const classes = useStyles();
 
-  const dispatch = useDispatch();
-
+  // const dispatch = useDispatch();
+  const { user, setUser } = useContext(UserContext);
   return (
     <div className={classes.root}>
       <AppBar position="static">
@@ -53,7 +54,14 @@ export default function Navbar(props) {
           </Link>
 
           {props.isAuthenticated && 
-            (<Button variant="outlined" color="default" style={{color:'red', fontWeight:'bold'}} onClick={() => dispatch(logout())} >
+            (<Button 
+              variant="outlined"
+              color="default"
+              style={{color:'red', fontWeight:'bold'}}
+              onClick={() => {
+                  const newUser = { name: null, isAuthenticated: false }
+                  setUser(newUser)
+            }} >
               <Typography variant="button" color="inherit"  style={{float: 'right', display: 'inline-block'}}>
                 Logout
               </Typography>
@@ -61,7 +69,7 @@ export default function Navbar(props) {
           }
 
         </Toolbar>
-
+        {/*make the logout button to the left and add the users' name upon login. */}
         
       </AppBar>
     </div>

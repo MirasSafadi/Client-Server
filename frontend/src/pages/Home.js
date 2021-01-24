@@ -4,10 +4,16 @@ import logo from '../logo.svg';
 // import { Link } from 'react-router-dom';
 import '../App.css';
 import { withRouter } from 'react-router-dom';
+import UserContext from '../context/user-context';
+
+
 
 
 class Home extends React.Component{
+    static contextType = UserContext;
+
     render(){
+        const { user, setUser } = this.context
         return (
             <div className="App">
                 <img src={logo} className="App-logo" alt="logo" />

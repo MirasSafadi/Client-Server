@@ -8,6 +8,7 @@ import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import history from './utils/history';
+import { UserProvider } from './context/user-context';
 
 import authReducer from './store/reducers/auth';
 
@@ -17,13 +18,29 @@ const store = createStore(authReducer, composeEnhances(
     applyMiddleware(thunk)
 ));
 
+const user = { 
+  name: null, 
+  isAuthenticated: !!localStorage.getItem('token'),
+  token: localStorage.getItem('token'),
+};
 
+//using react-redux
+// ReactDOM.render(
+//     <Provider store={store}>
+//       <Router>
+//         <App />
+//       </Router>
+//     </Provider>,
+//   document.getElementById('root')
+// );
+
+//using react context
 ReactDOM.render(
-    <Provider store={store}>
+    <UserProvider value={user}>
       <Router>
         <App />
       </Router>
-    </Provider>,
+    </UserProvider>,
   document.getElementById('root')
 );
 
