@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from '../logo.svg';
 import '../App.css';
+import { withRouter } from 'react-router-dom'
 
 
 class Phones extends React.Component{
@@ -14,4 +15,4 @@ class Phones extends React.Component{
     }
 }
 
-export default Phones;
+export default withRouter(Phones);

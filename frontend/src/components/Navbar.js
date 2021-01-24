@@ -5,6 +5,8 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../store/actions/auth';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,8 +20,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Navbar() {
+export default function Navbar(props) {
   const classes = useStyles();
+
+  const dispatch = useDispatch();
 
   return (
     <div className={classes.root}>
@@ -32,14 +36,14 @@ export default function Navbar() {
                 </Typography>
               </Button>
           </Link>
-          <Link to="/computers" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
+          <Link to="/computers/" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
               <Button variant="text" color="inherit">
                 <Typography variant="button" color="inherit">
                   Computers
                 </Typography>
               </Button>
           </Link>
-          <Link to="/phones" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
+          <Link to="/phones/" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
               <Button variant="text" color="inherit">
                 <Typography variant="button" color="inherit">
                   Phones
@@ -47,7 +51,18 @@ export default function Navbar() {
                 
               </Button>
           </Link>
+
+          {props.isAuthenticated && 
+            (<Button variant="outlined" color="default" style={{color:'red', fontWeight:'bold'}} onClick={() => dispatch(logout())} >
+              <Typography variant="button" color="inherit"  style={{float: 'right', display: 'inline-block'}}>
+                Logout
+              </Typography>
+            </Button>)
+          }
+
         </Toolbar>
+
+        
       </AppBar>
     </div>
   );

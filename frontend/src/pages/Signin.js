@@ -10,9 +10,10 @@ import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import { withStyles  } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import * as actions from '../store/actions/auth';
+import { withRouter } from "react-router-dom";
 import { connect } from 'react-redux';
 
 function Copyright() {
@@ -28,7 +29,7 @@ function Copyright() {
   );
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = theme => ({
   paper: {
     marginTop: theme.spacing(10),
     display: 'flex',
@@ -45,85 +46,135 @@ const useStyles = makeStyles((theme) => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
-  },
-}));
+  }
+})
 
+class SignIn extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {
+      email: '',
+      password: '',
+      rememberMe: false
+    }
+    this.handleChange = this.handleChange.bind(this);
+    this.submitForm = this.submitForm.bind(this);
+  }
+  componentDidMount(){
+    console.log(this.props.history.length)
+  }
+  handleChange(event){
+    let name = event.target.name;
+    let value = event.target.value;
+    this.setState({
+      [name] : value
+    });
+  }
 
-function SignIn() {
-  const classes = useStyles();
+  submitForm(event){
+    event.preventDefault();
+    let email = this.state.email;
+    let password = this.state.password;
+    if(email === '' || password === ''){
+      alert('One or more of the fields is missing!');
+      return;
+    }
+    this.props.authLogin(email,password);
+    //push history to homepage.
+    console.log('here');
+    this.props.history.push('/');
+  }
 
-  return (
-    <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign in
-        </Typography>
-        <form className={classes.form} noValidate>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            Sign In
-          </Button>
-          <Grid container>
-            <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
+  render(){
+    const { classes } = this.props;
+    return (
+      <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Avatar className={classes.avatar}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign in
+          </Typography>
+          <form  className={classes.form} id="loginForm">
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              onChange = {this.handleChange}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              onChange = {this.handleChange}
+            />
+            <FormControlLabel
+              control={<Checkbox value="remember" color="primary" />}
+              label="Remember me"
+              name="rememberMe"
+              onChange = {this.handleChange}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              form = "loginForm"
+              className={classes.submit}
+              onClick={this.submitForm}
+            >
+              Sign In
+            </Button>
+            <Grid container>
+              <Grid item xs>
+                <Link href="#" variant="body2">
+                  Forgot password?
+                </Link>
+              </Grid>
+              <Grid item>
+                <Link href="/signup" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
             </Grid>
-            <Grid item>
-              <Link href="/signup" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
-          </Grid>
-        </form>
-      </div>
-      <Box mt={8}>
-        <Copyright />
-      </Box>
-      <br/>
-    </Container>
-  );
+          </form>
+        </div>
+        <Box mt={8}>
+          <Copyright />
+        </Box>
+        <br/>
+        <Button variant="contained" color="primary" onClick={()=> this.props.history.push('/')}>
+                    go back 
+                </Button>
+      </Container>
+    );
+  }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    signIn: (email,password) => dispatch(actions.authLogin(email,password))
+    authLogin: (email,password,rememberMe) => dispatch(actions.authLogin(email,password,rememberMe))
+  }
+}
+const mapStateToProps = state => {
+  return {
+    error: state.error,
+    loading: state.loading
   }
 }
 
-export default connect(null, mapDispatchToProps)(SignIn);
+export default withStyles(useStyles)(connect(mapStateToProps,mapDispatchToProps)((withRouter(SignIn))));

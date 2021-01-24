@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as actionTypes from './actionTypes';
+import * as cookies from '../../utils/cookies';
 
 export const authStart = () => {
     return {
@@ -23,46 +24,48 @@ export const authFail = error => {
 }
 
 export const logout = () => {
-    //token should be stored in a cookie
-    // localStorage.removeItem('token');
-    // localStorage.removeItem('expirationDate');
+    if(localStorage.getItem('token') !== undefined){ //if the user checked 'remember me'
+        localStorage.removeItem('token'); //remove the token from the localStrage
+    } else{
+        //remove token from cookies as well
+        cookies.setCookie('token','',-0.5);
+    }
     return {
         type: actionTypes.AUTH_LOGOUT
     };
 }
 
-//logs out after the the token has expired
-export const checkAuthTimeout = expirationTime => {
+
+export const authLogin = (email, password,rememberMe) => {
     return dispatch => {
-        setTimeout(() => {
-            dispatch(logout());
-        }, expirationTime * 1000)
+        dispatch(authStart());
+        axios.post('http://localhost:8000/users/login/', {
+            email: email,
+            password: password
+        })
+        .then(res => {
+            const token = res.data.token;
+            const user = res.data.user;
+            if(rememberMe === true){
+                localStorage.setItem('token', token);
+            } else{
+                cookies.setCookie('token',token, 0.5);
+            }
+            dispatch(authSuccess(token,user));
+        })
+        .catch(err => {
+            console.log(err)
+            dispatch(authFail(err))
+        })
     }
 }
 
-export const authLogin = (username, password) => {
+export const authSignup = (fname,lname,email, password1, password2) => {
     return dispatch => {
-        // dispatch(authStart());
-        // axios.post('http://127.0.0.1:8000/rest-auth/login/', {
-        //     username: username,
-        //     password: password
-        // })
-        // .then(res => {
-        //     const token = res.data.key;
-        //     const expirationDate = new Date(new Date().getTime() + 3600 * 1000);
-        //     localStorage.setItem('token', token);
-        //     localStorage.setItem('expirationDate', expirationDate);
-        //     dispatch(authSuccess(token));
-        //     dispatch(checkAuthTimeout(3600));
-        // })
-        // .catch(err => {
-        //     dispatch(authFail(err))
-        // })
-    }
-}
-
-export const authSignup = (username, email, password1, password2) => {
-    return dispatch => {
+        dispatch(authStart());
+        const token = "some token";
+        //log the user in after registration
+        cookies.setCookie('token',token, 0.5);
         // dispatch(authStart());
         // axios.post('http://127.0.0.1:8000/rest-auth/registration/', {
         //     username: username,
@@ -81,23 +84,6 @@ export const authSignup = (username, email, password1, password2) => {
         // .catch(err => {
         //     dispatch(authFail(err))
         // })
-    }
-}
-//checks the validity of the login token
-export const authCheckState = () => {
-    return dispatch => {
-        console.log('authCheckState')
-        // const token = localStorage.getItem('token');
-        // if (token === undefined) {
-        //     dispatch(logout());
-        // } else {
-        //     const expirationDate = new Date(localStorage.getItem('expirationDate'));
-        //     if ( expirationDate <= new Date() ) {
-        //         dispatch(logout());
-        //     } else {
-        //         dispatch(authSuccess(token));
-        //         dispatch(checkAuthTimeout( (expirationDate.getTime() - new Date().getTime()) / 1000) );
-        //     }
-        // }
+        dispatch(authSuccess(token));
     }
 }

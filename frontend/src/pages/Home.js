@@ -3,6 +3,7 @@ import logo from '../logo.svg';
 // import Button from '@material-ui/core/Button';
 // import { Link } from 'react-router-dom';
 import '../App.css';
+import { withRouter } from 'react-router-dom';
 
 
 class Home extends React.Component{
@@ -13,12 +14,12 @@ class Home extends React.Component{
                 <h2 style={{color: 'white'}}>Welcome to our shop!</h2>
                 {/* <Link to="/login" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', textDecoration: 'none', marginBottom: 8}}>
                     <Button variant="contained" color="primary">
-                        Log in
+                        login
                     </Button>
-                </Link> */}
+                 </Link> */}
             </div>
         );
     }
 }
 
-export default Home;
+export default withRouter(Home);

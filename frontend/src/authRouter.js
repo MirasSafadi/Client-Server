@@ -1,22 +1,29 @@
 import React from "react";
-import { connect } from "react-redux";
 import { Redirect, Route, withRouter } from "react-router";
+import { connect } from 'react-redux';
 
 //use this component to define private routes
 //props: { path, children }
-const AuthRoute = (props) => {
+class AuthRoute extends React.Component{
 
-  const { isAuthenticated } = props;
-  return (
-  <Route exact path={props.path} >
-      {!isAuthenticated? <Redirect exact to="/login" /> : props.Component }
-  </Route>)
-};
+  componentDidMount(){
+  }
 
-const mapStateToProps = state => {
-  return {
-    isAuthenticated: false
+  render(){
+    return (
+      <Route exact path={this.props.path} >
+        {!this.props.isAuthenticated? <Redirect exact to="/login" /> : this.props.children }
+      </Route>
+    );
   }
 }
 
-export default withRouter(connect(mapStateToProps)(AuthRoute));
+const mapStateToProps = state => {
+  console.log('router: ',state);
+  return {
+    isAuthenticated: state.isAuthenticated
+  }
+}
+
+// export default connect(mapStateToProps,null)(withRouter(AuthRoute));
+export default withRouter(AuthRoute);

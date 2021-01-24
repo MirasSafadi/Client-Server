@@ -1,6 +1,6 @@
-import { isNewSessionRequired, isAuthRequired, generateJWTToken, verifyToken } from './common/authUtils';
 var createError = require('http-errors');
 var express = require('express');
+var bodyParser = require('body-parser')
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -8,9 +8,14 @@ var cors = require("cors");
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+
 var testAPIRouter = require("./routes/testAPI");
 
+var authUtils = require('./utils/authUtils');
+
+
 var app = express();
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -18,20 +23,29 @@ app.set('view engine', 'jade');
 
 app.use(cors());
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
+app.use(bodyParser.json())
+
+
+
+//middleware for auhtentication and authorization
 app.use(async (req, res, next) => {
   var apiUrl = req.originalUrl;
   var httpMethod = req.method;
   req.session = {};
   
-  if (isNewSessionRequired(httpMethod, apiUrl)) {
+  if (authUtils.isNewSessionRequired(httpMethod, apiUrl)) { //check if new session is required
     req.newSessionRequired = true;
-  } else if (isAuthRequired(httpMethod, apiUrl)) {
+  } else if (authUtils.isAuthRequired(httpMethod, apiUrl)) {//authorization requrired
+    //get the JWT from the header and verify it
     let authHeader = req.header('Authorization');
     let sessionID = authHeader.split(' ')[1];
     if (sessionID) {
@@ -61,6 +75,8 @@ app.use(async (req, res, next) => {
   }
   next();
 })
+
+
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

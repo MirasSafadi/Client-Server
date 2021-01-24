@@ -7,24 +7,23 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
+import history from './utils/history';
 
-
-import reducer from './store/reducers/auth';
+import authReducer from './store/reducers/auth';
 
 const composeEnhances = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
-const store = createStore(reducer, composeEnhances(
+const store = createStore(authReducer, composeEnhances(
     applyMiddleware(thunk)
 ));
 
+
 ReactDOM.render(
-  <React.StrictMode>
     <Provider store={store}>
       <Router>
         <App />
       </Router>
-    </Provider>
-  </React.StrictMode>,
+    </Provider>,
   document.getElementById('root')
 );
 
