@@ -7,25 +7,29 @@ class UserProvider extends Component {
   state = {
     token: localStorage.getItem('token'),
     user: {  
-      name: null, 
+      name: localStorage.getItem('name'), 
       isAuthenticated: !!localStorage.getItem('token'),
     },
   }
 
   // Method to update state
-  setUser = (user) => {
-    this.setState((prevState) => ({ user }))
+  setUser = (newUser) => {
+    this.setState({
+      token: newUser.token,
+      user: newUser.user
+    })
   }
 
   render() {
     const { children } = this.props
-    const { user } = this.state
+    const { user, token } = this.state
     const { setUser } = this
 
     return (
       <UserContext.Provider
         value={{
           user,
+          token,
           setUser,
         }}
       >

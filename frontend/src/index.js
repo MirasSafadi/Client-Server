@@ -18,10 +18,12 @@ const store = createStore(authReducer, composeEnhances(
     applyMiddleware(thunk)
 ));
 
-const user = { 
-  name: null, 
-  isAuthenticated: !!localStorage.getItem('token'),
+const user = {
   token: localStorage.getItem('token'),
+  user: {
+    name: null, 
+    isAuthenticated: !!localStorage.getItem('token')
+  }
 };
 
 //using react-redux

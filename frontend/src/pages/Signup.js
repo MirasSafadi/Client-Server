@@ -173,6 +173,8 @@ class SignUp extends React.Component {
                   type="password"
                   id="password1"
                 />
+              </Grid>
+              <Grid item xs={12}>
                 <TextField
                   variant="outlined"
                   required

@@ -9,7 +9,6 @@ import Activation from './pages/acountActivation';
 import RegistrationComplete from './pages/regitrationComplete';
 import { Route, Switch, withRouter } from 'react-router-dom';
 import HOC from './HOC/hoc';
-import { connect } from 'react-redux';
 import Navbar from './components/Navbar';
 import AuthRouter from './authRouter';
 import UserContext from './context/user-context';
@@ -21,8 +20,10 @@ class App extends React.Component{
   componentDidMount(){
     // console.log(localStorage.getItem('token'))
     // console.log(this.props.isAuthenticated);
-    const user = this.context
-    console.log(user) // { name: null, isAuthenticated: false }
+    const context = this.context
+    console.log(context)
+    console.log(context.user) // { token: null, user: { name: null, isAuthenticated: false } }
+    console.log(context.token) // { token: null, user: { name: null, isAuthenticated: false } }
   }
 
   render(){
@@ -61,13 +62,4 @@ class App extends React.Component{
   }
 }
 
-const mapStateToProps = state => {
-  console.log('App: ',state);
-  return {
-    isAuthenticated: state.isAuthenticated
-  }
-}
-
-
-// export default withRouter(connect(mapStateToProps)(App));
 export default withRouter(App);

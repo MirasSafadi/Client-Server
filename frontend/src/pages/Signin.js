@@ -96,13 +96,15 @@ class SignIn extends React.Component{
     .then(res => {
         const token = res.data.token;
         const user = res.data.user;
+        const name = user.first_name + ' ' + user.last_name;
         if(rememberMe === 'true'){
             localStorage.setItem('token', token);
+            localStorage.setItem('name',name);
         } else{
             cookies.setCookie('token',token, 0.5);
+            cookies.setCookie('name',name, 0.5);
         }
-        const name = user.first_name + ' ' + user.last_name;
-        this.context.setUser({name: name, isAuthenticated: true});
+        this.context.setUser({ token: token, user: {name: name, isAuthenticated: true} });
         //push history to homepage.
         this.props.history.push('/');
     })

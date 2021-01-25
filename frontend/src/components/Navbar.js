@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../store/actions/auth';
 import UserContext from '../context/user-context';
+import * as cookies from '../utils/cookies';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -59,8 +60,20 @@ export default function Navbar(props) {
               color="default"
               style={{color:'red', fontWeight:'bold'}}
               onClick={() => {
-                  const newUser = { name: null, isAuthenticated: false }
+                  if(localStorage.getItem('token')){
+                    localStorage.removeItem('token');
+                  } else{
+                    cookies.setCookie('token','', -0.5);
+                  }
+                  if(localStorage.getItem('name')){
+                    localStorage.removeItem('name');
+                  } else {
+                    cookies.setCookie('name','', -0.5);
+                  }
+
+                  const newUser = { token: null, user: { name: null, isAuthenticated: false } }
                   setUser(newUser)
+
             }} >
               <Typography variant="button" color="inherit"  style={{float: 'right', display: 'inline-block'}}>
                 Logout
