@@ -7,6 +7,9 @@ var crypto = require('crypto');
 const nodemailer = require("nodemailer");
 
 
+const MongoClient = require('mongodb').MongoClient;
+const url = "mongodb+srv://TechShop-Website:130795mrS@techshop-cluster.adibf.mongodb.net/TechShop?retryWrites=true&w=majority";
+
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -21,9 +24,6 @@ router.post('/login/', (req, res, next) => {
   var email = req.body.email;
   var password = req.body.password;
   var hashed_password = crypto.createHash('sha256').update(password).digest('hex');
-
-  var MongoClient = require('mongodb').MongoClient;
-  var url = "mongodb+srv://TechShop-Website:130795mrS@techshop-cluster.adibf.mongodb.net/TechShop?retryWrites=true&w=majority";
 
   MongoClient.connect(url,{ useUnifiedTopology: true }, function(err, db) {
     if (err) console.log(err);
@@ -47,13 +47,10 @@ router.post('/login/', (req, res, next) => {
 });
 
 
-
 //save the url-crypt in the database and only after verification insert the user to the DB
-router.post('/register/', (req, res, next) => {
-  console.log(req.body)
+router.post('/register/', async (req, res, next) => {
   // var data = JSON.parse(req.body);
   
-
   // console.log(data);
   var email = req.body.email;
   var first_name = req.body.first_name;
@@ -62,33 +59,15 @@ router.post('/register/', (req, res, next) => {
   var password2 = req.body.password2;
 
   //check if user exists...
-  var MongoClient = require('mongodb').MongoClient;
-  var url = "mongodb+srv://TechShop-Website:130795mrS@techshop-cluster.adibf.mongodb.net/TechShop?retryWrites=true&w=majority";
-
-  MongoClient.connect(url,{ useUnifiedTopology: true }, function(err, db) {
-    if (err){ 
-      console.log(err);
-      return res.status(500).json({error: `Mongo Error: ${err}`})
-    }
-    var dbo = db.db("TechShop");
-    var query = { email: email}
-    
-    dbo.collection("TechShop_Collection").findOne(query, function(e, result) {
-      if (e) console.log(e);
-      if(result){
-        return res.status(403).json({error: 'User already exists'});
-        console.log('here');
-      }
-      db.close();
-    });
-  });
-  console.log('here');
+  let userExists = await exists({email: email});
+  if(userExists){
+    return res.status(403).json({error: 'User Exists!'});
+  }
+  console.log('it should not reach here if it exists');
   //input validation...
   if(password1 !== password2){
     return res.status(403).json({error: 'Passwords do not match!'});
   }
-
-
   var hashed_password = crypto.createHash('sha256').update(password1).digest('hex');
 
   var payload = {
@@ -102,23 +81,14 @@ router.post('/register/', (req, res, next) => {
     ip: req.ip
   }
   var base64 = urlCrypt.cryptObj(payload);
-  var registrationUrl = 'http://' + req.headers.host + '/register/checkLink/' + base64;
+  var registrationUrl = 'http://' + req.headers.origin + '/register/checkLink/' + base64;
 
+  var data = { base64: base64}
   //add the base64 to mongo
-  MongoClient.connect(url,{ useUnifiedTopology: true }, function(err, db) {
-    if (err){ 
-      console.log(err);
-      return res.status(500).json({error: `Mongo Error: ${err}`})
-    }
-    var dbo = db.db("TechShop");
-    var data = { base64: base64}
-    
-    dbo.collection("TechShop_Collection").insertOne(data, function(e, result) {
-      if (e) console.log(e);
-
-      db.close();
-    });
-  });
+  let insertRes = await insertData(data);
+  if(!insertRes){
+    return res.status(500).json({error: 'Could not register!'});
+  }
 
   var message = {
     to: payload.user.email,
@@ -128,29 +98,49 @@ router.post('/register/', (req, res, next) => {
   if(sendMail('registration',message)){
     return res.status(200).send('Email sent!')
   }
-
+  return res.status(500).json({ error: 'mail error' })
+  // return res.status(200).send('Email sent!')
 });
 
-router.post('/verify/', (req, res, next) => {
 
+router.post('/verify/', async (req, res, next) => {
+  console.log(req.body)
   const base64 = req.body.base64;
+  let linkExists = await exists({ base64: base64 })
+  if(!linkExists){
+    console.log('here');
+    return res.status(400).send('Bad request.  Please check the link.');
+  }  //extract user info from base64..
+  var payload;
+  var user;
 
-  //extract user info from base64..
-
-
-
-  var MongoClient = require('mongodb').MongoClient;
-  var url = "mongodb+srv://TechShop-Website:130795mrS@techshop-cluster.adibf.mongodb.net/TechShop?retryWrites=true&w=majority";
+  try {
+    var OneDay = new Date().getTime() + (1 * 24 * 60 * 60 * 1000);
+    payload =  urlCrypt.decryptObj(base64);
+    user = payload.user;
+    var ip = payload.ip;
+    var date = payload.date;
+    if(ip !== req.ip){
+      throw new Error();
+    }
+    if(OneDay > date ){ //date is more than 24 hours
+      throw new Error();
+    }
+  } catch(e) {
+    // The link was mangled or tampered with. 
+    console.log('here1'); 
+    return res.status(400).send('Bad request.  Please check the link.');
+  }
 
   MongoClient.connect(url,{ useUnifiedTopology: true }, function(err, db) {
     if (err) console.log(err);
     var dbo = db.db("TechShop");
     var newValues = {
       $set: {
-        email: email,
-        first_name: first_name,
-        last_name: last_name,
-        password: hashed_password,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        password: user.password,
         promo_codes: [
           {
             code: "NEWUS3R", 
@@ -164,7 +154,7 @@ router.post('/verify/', (req, res, next) => {
 
     dbo.collection("TechShop_Collection").updateOne(query,newValues, function(e, result) {
       if (e) console.log(e);
-      if(result.ok === 1){
+      if(result.result.ok === 1){
         res.status(200).send('Succesfully registered');
       }else{
         res.status(500).json({error: 'internal server error'});
@@ -172,12 +162,8 @@ router.post('/verify/', (req, res, next) => {
       db.close();
     });
   });
+
 });
-
-
-
-
-
 
 
 
@@ -208,7 +194,11 @@ async function sendMail(type,message){
       subject: "Verify Your Account", // Subject line
       html: `<center><h1>Welcome to TechShop!</h1><br/><h3><a href="${message.registrationUrl}">Click here</a> to verify your email.</h3></center>`,// html body
     },(err,info) =>{
-      return !!err;
+      console.log(info);
+      if(err){
+        console.log(err);
+        return false;
+      }
     });
     return true
   } else if(type === 'reset-password'){
@@ -222,9 +212,60 @@ async function sendMail(type,message){
       text: "Hello world?",
       html: "<b>Hello world?</b>",
     }, (err, info) => {
-      return !!err;
+      console.log(info);
+      if(err){
+        console.log(err);
+        return false;
+      }
+      
     });
     return true;
+  }
+  return false;
+}
+
+async function exists(query){
+  const client = await MongoClient.connect(url, { useUnifiedTopology: true })
+    .catch(err => { console.log(err); });
+  if (!client) {
+    throw new Error('Mongo Error');
+  }
+  try {
+      const db = client.db("TechShop");
+      let collection = db.collection("TechShop_Collection")
+
+      let res = await collection.findOne(query);
+      if(res){
+        client.close();
+        return true;
+      }
+
+  } catch (err) {
+      console.log(err);
+  } finally {
+      client.close();
+  }
+  return false;
+}
+async function insertData(data){
+  const client = await MongoClient.connect(url, { useUnifiedTopology: true })
+    .catch(err => { console.log(err); });
+  if (!client) {
+    throw new Error('Mongo Error');
+  }
+  try {
+      const db = client.db("TechShop");
+      let collection = db.collection("TechShop_Collection")
+
+      let res = await collection.insertOne(data);
+      if(res.result.ok === 1){
+        client.close();
+        return true;
+      }
+  } catch (err) {
+      console.log(err);
+  } finally {
+      client.close();
   }
   return false;
 }
