@@ -12,9 +12,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { withStyles  } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import * as actions from '../store/actions/auth';
 import { withRouter } from "react-router-dom";
-import { connect } from 'react-redux';
 import UserContext from '../context/user-context';
 import axios from 'axios';
 import * as cookies from '../utils/cookies';
@@ -170,7 +168,7 @@ class SignIn extends React.Component{
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link href="#" variant="body2">
+                <Link href="/password/reset/" variant="body2">
                   Forgot password?
                 </Link>
               </Grid>
@@ -191,17 +189,4 @@ class SignIn extends React.Component{
   }
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    authLogin: (email,password,rememberMe) => dispatch(actions.authLogin(email,password,rememberMe))
-  }
-}
-const mapStateToProps = state => {
-  return {
-    error: state.error,
-    loading: state.loading
-  }
-}
-
-// export default withStyles(useStyles)(connect(mapStateToProps,mapDispatchToProps)((withRouter(SignIn))));
 export default withStyles(useStyles)((withRouter(SignIn)));

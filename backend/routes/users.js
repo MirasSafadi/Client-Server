@@ -5,22 +5,16 @@ var router = express.Router();
 
 var crypto = require('crypto');
 const nodemailer = require("nodemailer");
+var validators = require('../utils/inputValidators');
 
 
 const MongoClient = require('mongodb').MongoClient;
 const url = "mongodb+srv://TechShop-Website:130795mrS@techshop-cluster.adibf.mongodb.net/TechShop?retryWrites=true&w=majority";
 
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
 
 router.post('/login/', (req, res, next) => {
-  console.log(req.body)
-  // var data = JSON.parse(req.body);
-  
-  // console.log(data);
+
   var email = req.body.email;
   var password = req.body.password;
   var hashed_password = crypto.createHash('sha256').update(password).digest('hex');
@@ -30,7 +24,6 @@ router.post('/login/', (req, res, next) => {
     var dbo = db.db("TechShop");
 
     dbo.collection("TechShop_Collection").findOne({ email: email },{ projection: { _id: 0, email: 1, password: 1, first_name: 1, last_name: 1 } }, function(e, result) {
-      console.log(result)
       if (e) console.log(e);
       if(result.password === hashed_password){
         var user_info = {
@@ -49,25 +42,42 @@ router.post('/login/', (req, res, next) => {
 
 //save the url-crypt in the database and only after verification insert the user to the DB
 router.post('/register/', async (req, res, next) => {
-  // var data = JSON.parse(req.body);
   
-  // console.log(data);
   var email = req.body.email;
   var first_name = req.body.first_name;
   var last_name = req.body.last_name;
   var password1 = req.body.password1;
   var password2 = req.body.password2;
 
+
   //check if user exists...
   let userExists = await exists({email: email});
   if(userExists){
     return res.status(403).json({error: 'User Exists!'});
   }
-  console.log('it should not reach here if it exists');
+
+  
   //input validation...
+  if(!validators.validate(validators.validation_types.NAME,fname) || fname === ''){
+    return res.status(403).json({error: 'First name must contain only English letters.'});
+  }
+  if(!validators.validate(validators.validation_types.NAME,lname) || lname === ''){
+    return res.status(403).json({error: 'Last name must contain only English letters.'});
+  }
+  if(!validators.validate(validators.validation_types.EMAIL,email) || email === ''){
+    return res.status(403).json({error: 'Invalid email'});
+  }
+  if(password1 === '' || password2 === ''){
+    return res.status(403).json({error: 'Invalid Password'});
+  }
   if(password1 !== password2){
     return res.status(403).json({error: 'Passwords do not match!'});
   }
+  if(!validators.validate(validators.validation_types.PASSWORD,password1)){
+    return res.status(403).json({error: 'Invalid Password'});
+  }
+
+
   var hashed_password = crypto.createHash('sha256').update(password1).digest('hex');
 
   var payload = {
@@ -81,7 +91,7 @@ router.post('/register/', async (req, res, next) => {
     ip: req.ip
   }
   var base64 = urlCrypt.cryptObj(payload);
-  var registrationUrl = 'http://' + req.headers.origin + '/register/checkLink/' + base64;
+  var registrationUrl = req.headers.origin + '/register/checkLink/' + base64;
 
   var data = { base64: base64}
   //add the base64 to mongo
@@ -91,11 +101,11 @@ router.post('/register/', async (req, res, next) => {
   }
 
   var message = {
-    to: payload.user.email,
+    to: email,
     registrationUrl: registrationUrl
   };
 
-  if(sendMail('registration',message)){
+  if(await sendMail('registration',message)){
     return res.status(200).send('Email sent!')
   }
   return res.status(500).json({ error: 'mail error' })
@@ -103,14 +113,13 @@ router.post('/register/', async (req, res, next) => {
 });
 
 
-router.post('/verify/', async (req, res, next) => {
-  console.log(req.body)
+router.post('/register/verify/', async (req, res, next) => {
   const base64 = req.body.base64;
   let linkExists = await exists({ base64: base64 })
   if(!linkExists){
-    console.log('here');
-    return res.status(400).send('Bad request.  Please check the link.');
-  }  //extract user info from base64..
+    return res.status(400).json({error: 'Corrupted Link!'});
+  }  
+  //extract user info from base64..
   var payload;
   var user;
 
@@ -127,9 +136,8 @@ router.post('/verify/', async (req, res, next) => {
       throw new Error();
     }
   } catch(e) {
-    // The link was mangled or tampered with. 
-    console.log('here1'); 
-    return res.status(400).send('Bad request.  Please check the link.');
+    // The link was mangled or tampered with.
+    return res.status(400).json({error: 'Corrupted Link!'});
   }
 
   MongoClient.connect(url,{ useUnifiedTopology: true }, function(err, db) {
@@ -163,6 +171,113 @@ router.post('/verify/', async (req, res, next) => {
     });
   });
 
+});
+
+router.post('/password/reset/', async (req,res,next) => {
+  let email = req.body.email;
+
+  if(!validators.validate(validators.validation_types.EMAIL,email) || email === ''){
+    return res.status(403).json({error: 'Invalid email'});
+  }
+
+  //check if user exists...
+  let userExists = await exists({email: email});
+  if(!userExists){
+    return res.status(404).json({error: 'User Does not Exists!'});
+  }
+
+  let userInfo = await findRecord({email: email});
+  let payload = {
+    user: {
+      email: userInfo.email,
+      password: userInfo.password
+    },
+    ip: req.ip,
+    date: new Date()
+  }
+
+  var base64 = urlCrypt.cryptObj(payload);
+  var resetPasswordUrl = req.headers.origin + '/password/reset/verify/' + base64;
+
+
+  var message = {
+    to: email,
+    resetPasswordUrl: resetPasswordUrl
+  }
+  
+
+  if(await sendMail('reset-password',message)){
+    return res.status(200).send('Email sent!')
+  }
+  return res.status(500).json({ error: 'mail error' })
+
+});
+
+router.post('/password/reset/verify/', async (req,res,next) => {
+  var base64 = req.body.base64;
+  var password1 = req.body.password1;
+  var password2 = req.body.password2;
+
+  if(password1 === '' || password2 === ''){
+    return res.status(403).json({error: 'Invalid Password'});
+  }
+  if(password1 !== password2){
+    return res.status(403).json({error: 'Passwords do not match!'});
+  }
+  if(!validators.validate(validators.validation_types.PASSWORD,password1)){
+    return res.status(403).json({error: 'Invalid Password'});
+  }
+
+  var payload;
+  var user;
+
+  try {
+    var OneDay = new Date().getTime() + (1 * 24 * 60 * 60 * 1000);
+    payload =  urlCrypt.decryptObj(base64);
+    var ip = payload.ip;
+    var date = payload.date;
+    if(ip !== req.ip){
+      throw new Error();
+    }
+    if(OneDay > date ){ //date is more than 24 hours
+      throw new Error();
+    }
+    //check if user does not exists...
+    var userExists = await exists({email: payload.user.email});
+    if(!userExists){
+      throw new Error();
+    }
+    user = await findRecord({email: payload.user.email});
+    if(user.password !== payload.user.password){
+      throw new Error();
+    }
+  } catch(e) {
+    // The link was mangled or tampered with.
+    return res.status(400).json({error: 'Corrupted Link!'});
+  }
+  
+  var hashed_password = crypto.createHash('sha256').update(password1).digest('hex');
+
+  MongoClient.connect(url,{ useUnifiedTopology: true }, function(err, db) {
+    if (err) console.log(err);
+    var dbo = db.db("TechShop");
+    var newValues = {
+      $set: {
+        password: hashed_password,
+      }
+    }
+    var query = { email: user.email };
+
+    dbo.collection("TechShop_Collection").updateOne(query,newValues, function(e, result) {
+      if (e) console.log(e);
+      if(result.result.ok === 1){
+        res.status(200).send('Password reset successful!');
+      }else{
+        res.status(500).json({error: 'internal server error'});
+      }
+      db.close();
+    });
+  });
 });
 
 
@@ -209,8 +324,8 @@ async function sendMail(type,message){
       subject: "Reset Your Password",
 
       //change that to an html page..
-      text: "Hello world?",
-      html: "<b>Hello world?</b>",
+      text: "Reset your password",
+      html: `<center><h1>We heard you forgot your password!</h1><br/><h3>No worries, just <a href="${message.resetPasswordUrl}">Click here</a> to reset it.</h3></center>`,
     }, (err, info) => {
       console.log(info);
       if(err){
@@ -223,6 +338,7 @@ async function sendMail(type,message){
   }
   return false;
 }
+
 
 async function exists(query){
   const client = await MongoClient.connect(url, { useUnifiedTopology: true })
@@ -268,6 +384,29 @@ async function insertData(data){
       client.close();
   }
   return false;
+}
+
+async function findRecord(query){
+  const client = await MongoClient.connect(url, { useUnifiedTopology: true })
+    .catch(err => { console.log(err); });
+  if (!client) {
+    throw new Error('Mongo Error');
+  }
+  try {
+      const db = client.db("TechShop");
+      let collection = db.collection("TechShop_Collection")
+
+      let res = await collection.findOne(query);
+      if(res){
+        return res;
+      }
+
+  } catch (err) {
+      console.log(err);
+  } finally {
+      client.close();
+  }
+  return null;
 }
 
 module.exports = router;

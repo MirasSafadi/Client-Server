@@ -5,8 +5,6 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { logout } from '../store/actions/auth';
 import UserContext from '../context/user-context';
 import * as cookies from '../utils/cookies';
 

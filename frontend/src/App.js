@@ -7,11 +7,16 @@ import Computers from './pages/Computers';
 import Phones from './pages/Phones';
 import Activation from './pages/acountActivation';
 import RegistrationComplete from './pages/regitrationComplete';
-import { Route, Switch, withRouter } from 'react-router-dom';
+import { Route, Switch, withRouter, Link } from 'react-router-dom';
 import HOC from './HOC/hoc';
 import Navbar from './components/Navbar';
 import AuthRouter from './authRouter';
 import UserContext from './context/user-context';
+import ForgotPassword from './pages/forgotPassword';
+import ForgotPasswordVerify from './pages/forgotPasswordVerify';
+import ResetPasswordEmail from './pages/resetPasswordEmail';
+import ResetPasswordComplete from './pages/resetPasswordComplete';
+import NotFound from './pages/404';
 
 
 class App extends React.Component{
@@ -31,6 +36,7 @@ class App extends React.Component{
     return (
       <HOC>
         <Navbar isAuthenticated={user.isAuthenticated} />
+        
         <Switch>
           <Route exact path="/login/" >
             <SignIn />
@@ -50,12 +56,23 @@ class App extends React.Component{
           <Route exact path="/phones/" >
             <Phones />
           </Route>
-          {/* <AuthRouter path="/" >
-            <Home />
-          </AuthRouter> */}
+          <Route exact path="/password/reset/" >
+            <ForgotPassword />
+          </Route>
+          <Route exact path="/password/reset/verify/:base64/" >
+            <ForgotPasswordVerify />
+          </Route>
+          <Route exact path="/password/reset/complete/" >
+            <ResetPasswordEmail />
+          </Route>
+          <Route exact path="/password/reset/success/" >
+            <ResetPasswordComplete />
+          </Route>
+
           <AuthRouter isAuthenticated={user.isAuthenticated} path="/" >
             <Home />
           </AuthRouter>
+          {/* <Route component={NotFound} /> */}
         </Switch>
       </HOC>
     );

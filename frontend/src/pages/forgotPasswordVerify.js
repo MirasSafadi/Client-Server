@@ -10,16 +10,12 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import ReCAPTCHA from "react-google-recaptcha";
 import { withRouter } from "react-router-dom";
 import UserContext from '../context/user-context';
 import axios from 'axios';
 import * as validators from '../utils/inputValidators';
 
 
-
-const TEST_SITE_KEY = "6LeoExQaAAAAAGwiyrmrZa3e6lwmmUj726tqSs_t";
-const DELAY = 1500;
 
 function Copyright() {
   return (
@@ -54,34 +50,17 @@ const useStyles = theme => ({
   },
 });
 
-class SignUp extends React.Component {
+class ForgotPasswordVerify extends React.Component {
   static contextType = UserContext;
 
   constructor(props){
     super(props);
     this.state = {
-      //for the recaptcha
-      value: '[empty]',
-      load: false,
-      expired: false,
-
-      fname: '',
-      lname: '',
-      email: '',
       password1: '',
       password2: ''
     }
     this.handleChange = this.handleChange.bind(this);
     this.submitForm = this.submitForm.bind(this);
-    this.handleCAPTCHAChange = this.handleCAPTCHAChange.bind(this);
-  }
-
-  componentDidMount(){
-    setTimeout(() => {
-      this.setState({
-        load: true
-      })
-    }, DELAY);
   }
 
   handleChange(event){
@@ -91,43 +70,12 @@ class SignUp extends React.Component {
       [name] : value
     });
   }
-
-  handleCAPTCHAChange(cValue){
-    this.setState({
-      value: cValue
-    });
-    // if value is null recaptcha expired
-    if (cValue === null) 
-      this.setState({
-        expired: true
-      })
-  }
   submitForm(event){
     event.preventDefault();
-    let fname = this.state.fname;
-    let lname = this.state.lname;
-    let email = this.state.email;
     let password1 = this.state.password1;
     let password2 = this.state.password2;
-    let value = this.state.value;
-    console.log(fname,lname,email, password1,password2)
-    //validate input and recaptcha...
-    if(value === '[empty]' || this.state.expired){
-      alert('please recheck the CAPTCHA box!')
-      return;
-    }
-    if(!validators.validate(validators.validation_types.NAME,fname)){
-      alert('First name must contain only English letters.');
-      return;
-    }
-    if(!validators.validate(validators.validation_types.NAME,lname)){
-      alert('Last name must contain only English letters.');
-      return;
-    }
-    if(!validators.validate(validators.validation_types.EMAIL,email)){
-      alert('Invalid Email.');
-      return;
-    }
+    let base64 = this.props.match.params.base64;
+    //input validation..
     if(password1 !== password2){
       alert('Passwords do not match.');
       return;
@@ -141,24 +89,20 @@ class SignUp extends React.Component {
       alert(passAlert);
       return;
     }
-    
     var data = {
-      email: email,
-      first_name: fname,
-      last_name: lname,
-      password1: password1,
-      password2: password2
+        base64: base64,
+        password1: password1,
+        password2: password2
     }
-    axios.post('http://localhost:8000/users/register/',data)
-    .then(() => {
-      this.props.history.push('/signup/complete/');
-    }).catch(error =>{
-      console.log(error);
-    });
+    axios.post('http://localhost:8000/users/password/reset/verify/',data)
+    .then(res =>{
+        this.props.history.push('/password/reset/success/')
+    }).catch(err =>{
+
+    })
   }
   render(){
     const { classes } = this.props;
-    // const { user, setUser } = this.context
     return (
       <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
         <CssBaseline />
@@ -167,47 +111,10 @@ class SignUp extends React.Component {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign up
+            Forgot Password
           </Typography>
-          <form onSubmit={this.submitForm} className={classes.form}>
+          <form onSubmit={this.submitForm} className={classes.form} >
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="fname"
-                  name="fname"
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
-                  onChange={this.handleChange}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lname"
-                  autoComplete="lname"
-                  onChange={this.handleChange}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  onChange={this.handleChange}
-                />
-              </Grid>
               <Grid item xs={12}>
                 <TextField
                   variant="outlined"
@@ -232,15 +139,6 @@ class SignUp extends React.Component {
                   onChange={this.handleChange}
                 />
               </Grid>
-              <Grid item xs={12}>
-              {this.state.load && (
-                <ReCAPTCHA
-                  theme="light"
-                  sitekey={TEST_SITE_KEY}
-                  onChange={this.handleCAPTCHAChange}
-                />
-              )}
-              </Grid>
             </Grid>
             <Button
               type="submit"
@@ -249,15 +147,8 @@ class SignUp extends React.Component {
               color="primary"
               className={classes.submit}
             >
-              Sign Up
+              Send me a link
             </Button>
-            <Grid container justify="flex-end">
-              <Grid item>
-                <Link href="/login" variant="body2">
-                  Already have an account? Sign in
-                </Link>
-              </Grid>
-            </Grid>
           </form>
         </div>
         <Box mt={5}>
@@ -269,4 +160,4 @@ class SignUp extends React.Component {
   }
 }
 
-export default withStyles(useStyles)(withRouter(SignUp));
+export default withStyles(useStyles)(withRouter(ForgotPasswordVerify));
