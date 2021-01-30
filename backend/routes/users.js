@@ -257,28 +257,77 @@ router.post('/password/reset/verify/', async (req,res,next) => {
   }
   
   var hashed_password = crypto.createHash('sha256').update(password1).digest('hex');
-
-  MongoClient.connect(url,{ useUnifiedTopology: true }, function(err, db) {
-    if (err) console.log(err);
-    var dbo = db.db("TechShop");
-    var newValues = {
-      $set: {
-        password: hashed_password,
-      }
+  var newValues = {
+    $set: {
+      password: hashed_password,
     }
-    var query = { email: user.email };
+  }
+  var query = { email: user.email };
+  let updateResult = await updateRecord(query,newValues)
+  if(updateResult){
+    if(await sendMail('password-change')){
+      return res.status(200).send('success');
+    }
+    return res.status(500).json({error: 'Internal server error!'});
+  }
+  return res.status(500).json({error: 'Internal server error!'});
 
-    dbo.collection("TechShop_Collection").updateOne(query,newValues, function(e, result) {
-      if (e) console.log(e);
-      if(result.result.ok === 1){
-        res.status(200).send('Password reset successful!');
-      }else{
-        res.status(500).json({error: 'internal server error'});
-      }
-      db.close();
-    });
-  });
 });
+
+router.put('/password/change/', async (req,res,next) => {
+  var old_password = req.body.old_password;
+  var new_password1 = req.body.new_password1;
+  var new_password2 = req.body.new_password2;
+  var userData = req.session.userData;
+
+  var hashed_old_password = crypto.createHash('sha256').update(old_password).digest('hex');
+  if(userData.password !== hashed_old_password){
+    return res.status(406).json({error: 'old password is incorrect'});
+  }
+  if(new_password1 === '' || new_password2 === ''){
+    return res.status(403).json({error: 'Invalid Password'});
+  }
+  if(new_password1 !== new_password2){
+    return res.status(403).json({error: 'Passwords do not match!'});
+  }
+  if(!validators.validate(validators.validation_types.PASSWORD,new_password1)){
+    return res.status(403).json({error: 'Invalid Password'});
+  }
+  var hashed_new_password = crypto.createHash('sha256').update(new_password1).digest('hex');
+  var newValues = {
+    $set: {
+      password: hashed_new_password,
+    }
+  }
+  var query = { email: user.email };
+  let updateResult = await updateRecord(query,newValues)
+  if(updateResult){
+    if(await sendMail('password-change')){
+      return res.status(200).send('success');
+    }
+    return res.status(500).json({error: 'Internal server error!'});
+  }
+  return res.status(500).json({error: 'Internal server error!'});
+});
+
+
+router.put('/email/change/', async (req,res,next) =>{
+  //TODO:
+  //generate verification link just like in register..
+});
+router.put('/email/change/verify/', async (req,res,next) =>{
+  var base64 = req.body.base64;
+  /** TODO:  */
+  //decrypt object
+  //get payload, from payload get new email (payload.new_email)
+  //payload will also include old email to check in the database
+});
+router.put('/info/change/', async (req,res,next) =>{
+  //just update in DB
+});
+
+
+
 
 
 
@@ -304,7 +353,7 @@ async function sendMail(type,message){
   if(type === 'registration'){
     // send mail with defined transport object
     await transporter.sendMail({
-      from: 'TechShop Registration <csp.techshop3@gmail.com>', // sender address
+      from: 'TechShop <csp.techshop3@gmail.com>', // sender address
       to: to, // list of receivers
       subject: "Verify Your Account", // Subject line
       html: `<center><h1>Welcome to TechShop!</h1><br/><h3><a href="${message.registrationUrl}">Click here</a> to verify your email.</h3></center>`,// html body
@@ -319,13 +368,51 @@ async function sendMail(type,message){
   } else if(type === 'reset-password'){
     // send mail with defined transport object
     transporter.sendMail({
-      from: 'TechShop Registration <csp.techshop3@gmail.com>',
+      from: 'TechShop <csp.techshop3@gmail.com>',
       to: to,
       subject: "Reset Your Password",
 
       //change that to an html page..
       text: "Reset your password",
       html: `<center><h1>We heard you forgot your password!</h1><br/><h3>No worries, just <a href="${message.resetPasswordUrl}">Click here</a> to reset it.</h3></center>`,
+    }, (err, info) => {
+      console.log(info);
+      if(err){
+        console.log(err);
+        return false;
+      }
+      
+    });
+    return true;
+  } else if(type === 'password-change'){
+    // send mail with defined transport object
+    transporter.sendMail({
+      from: 'TechShop <csp.techshop3@gmail.com>',
+      to: to,
+      subject: "Your password was changed",
+
+      //change that to an html page..
+      text: "Your password was changed",
+      html: `<center><h1>You changed your password!</h1><br/><h3>Just letting you know...</h3><p>If you do not remember changing your password go and reset it.</p></center>`,
+    }, (err, info) => {
+      console.log(info);
+      if(err){
+        console.log(err);
+        return false;
+      }
+      
+    });
+    return true;
+  } else if(type === 'email-change'){
+    // send mail with defined transport object
+    transporter.sendMail({
+      from: 'TechShop <csp.techshop3@gmail.com>',
+      to: to,
+      subject: "Your email was changed",
+
+      //change that to an html page..
+      text: "Your email was changed",
+      html:  `<center><h1>You changed your email!</h1><br/><h3>You need to <a href="${message.emailVerification}">verify it</a> before you login</h3></center>`,
     }, (err, info) => {
       console.log(info);
       if(err){
@@ -407,6 +494,26 @@ async function findRecord(query){
       client.close();
   }
   return null;
+}
+
+async function updateRecord(query,newValues){
+  const client = await MongoClient.connect(url, { useUnifiedTopology: true })
+    .catch(err => { console.log(err); });
+  if (!client) {
+    throw new Error('Mongo Error');
+  }
+  try {
+      const db = client.db("TechShop");
+      let collection = db.collection("TechShop_Collection")
+
+      let res = await collection.updateOne(query,newValues);
+      return res.result.ok === 1;
+
+  } catch (err) {
+      console.log(err);
+  } finally {
+      client.close();
+  }
 }
 
 module.exports = router;

@@ -1,16 +1,21 @@
 var jwt = require('jsonwebtoken');
 const { merge } = require('../app');
-//these routes require an Authorization header in the request
-const newSessionRoutes = [
-    { path: '/users/login/', method: 'POST' }
-];
+
 //these routes require a new token being generated and sent back
-const authRoutes = [
-    { path: '/users/reset-password/', method: 'PUT' },
-    { path: '/users/registration/', method: 'PUT' }
+const newSessionRoutes = [
+    { path: '/users/login/', method: 'POST' },
 ];
+//these routes require an Authorization header in the request
+const authRoutes = [
+    { path: '/users/password/change/', method: 'PUT' },
+    { path: '/users/email/change/', method: 'PUT' },
+    { path: '/users/info/change/', method: 'PUT' },
+];
+
 //the secret key to be used in generating and verifying the tokens (for better security, generate a random byte string and store it in a .env file).
 const SECRET_KEY = "CLIENT-SERVER_PROJECT_JWT_SECRET_KEY";
+
+
 //determine whether or not a new session token is required based on the method and the URL
 const isNewSessionRequired = (httpMethod, url) => {
   for (let routeObj of newSessionRoutes) {
@@ -48,6 +53,9 @@ const verifyToken = (jwtToken) =>{
        return null;
     }
  }
+
+
+
 module.exports = {
  isNewSessionRequired: isNewSessionRequired,
  isAuthRequired: isAuthRequired,

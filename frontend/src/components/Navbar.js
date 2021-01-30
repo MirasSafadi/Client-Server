@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import UserContext from '../context/user-context';
@@ -29,6 +30,8 @@ export default function Navbar(props) {
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar variant="dense">
+          <div style={{display: 'flex', flexGrow: 1}}>
+
           <Link to="/" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
               <Button variant="text" color="inherit">
                 <Typography variant="button" color="inherit">
@@ -52,8 +55,28 @@ export default function Navbar(props) {
               </Button>
           </Link>
 
+          {props.isAuthenticated &&
+            (<Link to="/profile/" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
+              <Button variant="text" color="inherit">
+                <Typography variant="button" color="inherit">
+                  Profile
+                </Typography>
+                
+              </Button>
+            </Link>)
+          }
+          </div>
           {props.isAuthenticated && 
-            (<Button 
+            (
+              <div>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+            <Typography noWrap={true} display="inline" variant="body1" color="inherit" style={{verticalAlign: 'middle'}} >
+              {user.name}
+            </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+            <Button 
               variant="outlined"
               color="default"
               style={{color:'red', fontWeight:'bold'}}
@@ -73,10 +96,13 @@ export default function Navbar(props) {
                   setUser(newUser)
 
             }} >
-              <Typography variant="button" color="inherit"  style={{float: 'right', display: 'inline-block'}}>
+              <Typography variant="button" color="inherit"  >
                 Logout
               </Typography>
-            </Button>)
+            </Button>
+            </Grid>
+            </Grid>
+            </div>)
           }
 
         </Toolbar>
