@@ -312,9 +312,40 @@ router.put('/password/change/', async (req,res,next) => {
 
 
 router.put('/email/change/', async (req,res,next) =>{
-  //TODO:
-  //generate verification link just like in register..
+
+  var email = req.body.email;
+  var first_name = req.body.first_name;
+  var last_name = req.body.last_name;
+  var password = req.body.password;
+  var hashed_password = crypto.createHash('sha256').update(password).digest('hex');
+  var ip = req.ip;
+
+  var payload = {
+    user: {
+      email: email,
+      first_name: first_name,
+      last_name: last_name,
+      password: hashed_password
+    },
+    date: new Date(),
+    ip: ip
+  }
+
+  var base64 = urlCrypt.cryptObj(payload);
+  var registrationUrl = req.headers.origin + '/email/change/checkLink/' + base64;
+
+  var message = {
+    to: email,
+    registrationUrl: registrationUrl
+  };
+
+  if(await sendMail('registration',message)){
+    return res.status(200).send('Email sent successfully!')
+  }
+  return res.status(500).json({ error: 'Error in sending e-mail' })
+
 });
+
 router.put('/email/change/verify/', async (req,res,next) =>{
   var base64 = req.body.base64;
   /** TODO:  */
@@ -324,6 +355,25 @@ router.put('/email/change/verify/', async (req,res,next) =>{
 });
 router.put('/info/change/', async (req,res,next) =>{
   //just update in DB
+  var new_email = req.body.email;
+  var id = req.body.id;
+  var userData = req.session.userData;
+
+  var newValues = {
+    $set: {
+      email: new_email,
+    }
+  }
+  var query = { ud: id };
+
+  let updateResult = await updateRecord(query,newValues)
+  if(updateResult){
+    if(await sendMail('email-change')){
+      return res.status(200).send('success');
+    }
+    return res.status(500).json({error: 'Internal server error!'});
+  }
+  return res.status(500).json({error: 'Internal server error!'});
 });
 
 
