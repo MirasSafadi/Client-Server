@@ -44,7 +44,7 @@ const useStyles = theme => ({
 
 class EmailForm extends React.Component{
     static contextType = UserContext;
-
+    //TODO: add value to email from context
     constructor(props){
         super(props);
         // const { user, setUser } = this.context
@@ -66,7 +66,14 @@ class EmailForm extends React.Component{
 
     submitForm(event){
         event.preventDefault();
-
+        let email = this.state.email;
+        //TODO: input validation
+        axios.put('http://localhost:8000/users/email/change/', {email: email})
+        .then(res =>{
+          //TODO: display message for user
+        }).catch(error =>{
+          //TODO: display message for user
+        });
     }
 
 

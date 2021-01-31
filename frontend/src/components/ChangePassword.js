@@ -44,7 +44,7 @@ const useStyles = theme => ({
 
 class PasswordForm extends React.Component{
     static contextType = UserContext;
-
+    //TODO: add value to email from context
     constructor(props){
         super(props);
         // const { user, setUser } = this.context
@@ -68,7 +68,21 @@ class PasswordForm extends React.Component{
 
     submitForm(event){
         event.preventDefault();
-
+        let old_password = this.state.old_password;
+        let new_password1 = this.state.new_password1;
+        let new_password2 = this.state.new_password2;
+        //TODO: input validation
+        var body = {
+            old_password: old_password,
+            new_password1: new_password1,
+            new_password2: new_password2
+        }
+        axios.put('http://localhost:8000/users/password/change/',body)
+        .then(res =>{
+            //TODO: display message
+        }).catch(error =>{
+            //TODO: display message
+        });
     }
 
 

@@ -55,6 +55,14 @@ export default function Navbar(props) {
                 
               </Button>
           </Link>
+          <Link to="/about/" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
+              <Button variant="text" color="inherit">
+                <Typography variant="button" color="inherit">
+                  About Us
+                </Typography>
+                
+              </Button>
+          </Link>
 
           {props.isAuthenticated &&
             (<Link to="/profile/" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>

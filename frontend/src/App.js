@@ -18,6 +18,8 @@ import ResetPasswordEmail from './pages/resetPasswordEmail';
 import ResetPasswordComplete from './pages/resetPasswordComplete';
 import NotFound from './pages/404';
 import Profile from './pages/profile';
+import About from './pages/about';
+import EmailVerification from './pages/emailVerification';
 // import baseRouter from './baseRouter';
 
 
@@ -47,6 +49,9 @@ class App extends React.Component{
           <Route exact path="/register/checkLink/:base64/" >
             <Activation />
           </Route>
+          <Route exact path="/email/change/checkLink/:base64/" >
+            <EmailVerification />
+          </Route>
           <Route exact path="/signup/" >
             <SignUp />
           </Route>
@@ -61,6 +66,9 @@ class App extends React.Component{
           </Route>
           <Route exact path="/profile/" >
             <Profile />
+          </Route>
+          <Route exact path="/about/" >
+            <About />
           </Route>
           <Route exact path="/password/reset/" >
             <ForgotPassword />

@@ -32,9 +32,9 @@ const useStyles = theme => ({
 
 class InfoForm extends React.Component{
     static contextType = UserContext;
-
-    constructor(props,context){
-        super(props,context);
+    //TODO: add value to email from context
+    constructor(props){
+        super(props);
         // const { user, setUser } = this.context
         this.state = {
             first_name: '',
@@ -60,7 +60,29 @@ class InfoForm extends React.Component{
 
     submitForm(event){
         event.preventDefault();
-
+        let first_name = this.state.first_name;
+        let last_name = this.state.last_name;
+        let country = this.state.country;
+        let city = this.state.city;
+        let street = this.state.street;
+        let zipCode = this.state.zipCode;
+        let phone_number = this.state.phone_number;
+        //TODO: input validation..
+        var body = {
+          first_name: first_name,
+          last_name: last_name,
+          country: country,
+          city: city,
+          street: street,
+          zipCode: zipCode,
+          phone_number: phone_number
+        }
+        axios.put('http://localhost:8000/users/info/change/',body)
+        .then(res =>{
+          //TODO: display message
+        }).catch(error =>{
+          //TODO: display message
+        });
     }
 
 
