@@ -7,7 +7,7 @@ import Computers from './pages/Computers';
 import Phones from './pages/Phones';
 import Activation from './pages/acountActivation';
 import RegistrationComplete from './pages/regitrationComplete';
-import { Route, Switch, withRouter, Link } from 'react-router-dom';
+import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
 import HOC from './HOC/hoc';
 import Navbar from './components/Navbar';
 import AuthRouter from './authRouter';
@@ -17,7 +17,8 @@ import ForgotPasswordVerify from './pages/forgotPasswordVerify';
 import ResetPasswordEmail from './pages/resetPasswordEmail';
 import ResetPasswordComplete from './pages/resetPasswordComplete';
 import NotFound from './pages/404';
-import baseRouter from './baseRouter';
+import Profile from './pages/profile';
+// import baseRouter from './baseRouter';
 
 
 class App extends React.Component{
@@ -33,12 +34,13 @@ class App extends React.Component{
   }
 
   render(){
-    const { user, setUser } = this.context
+    const { user } = this.context
     return (
       <HOC>
         <Navbar isAuthenticated={user.isAuthenticated} />
         
         <Switch>
+
           <Route exact path="/login/" >
             <SignIn />
           </Route>
@@ -57,6 +59,9 @@ class App extends React.Component{
           <Route exact path="/phones/" >
             <Phones />
           </Route>
+          <Route exact path="/profile/" >
+            <Profile />
+          </Route>
           <Route exact path="/password/reset/" >
             <ForgotPassword />
           </Route>
@@ -69,14 +74,15 @@ class App extends React.Component{
           <Route exact path="/password/reset/success/" >
             <ResetPasswordComplete />
           </Route>
-
-          {/* <Route path="*" >
+          <Route exact path="/notfound/">
             <NotFound />
-          </Route> */}
-          
+          </Route>
+
           <AuthRouter isAuthenticated={user.isAuthenticated} path="/" >
             <Home />
           </AuthRouter>
+
+          <Redirect to="/notfound/" />
 
         </Switch>
       </HOC>

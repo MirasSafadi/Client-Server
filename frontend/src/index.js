@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import history from './utils/history';
 import { UserProvider } from './context/user-context';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 import authReducer from './store/reducers/auth';
 
 const composeEnhances = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose

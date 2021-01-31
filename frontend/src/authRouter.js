@@ -11,7 +11,7 @@ class AuthRoute extends React.Component{
   render(){
     return (
       <Route exact path={this.props.path} >
-        {!this.props.isAuthenticated? <Redirect exact to="/login" /> : this.props.children }
+        {!this.props.isAuthenticated? <Redirect to="/login/" /> : this.props.children }
       </Route>
     );
   }

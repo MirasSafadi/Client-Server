@@ -1,5 +1,5 @@
 import React from 'react'
-import { Switch, Route, withRouter } from 'react-router-dom';
+import { Switch,Route, withRouter } from 'react-router-dom';
 import SignIn from './pages/Signin';
 import SignUp from './pages/Signup';
 import Computers from './pages/Computers';
@@ -10,6 +10,7 @@ import ForgotPassword from './pages/forgotPassword';
 import ForgotPasswordVerify from './pages/forgotPasswordVerify';
 import ResetPasswordEmail from './pages/resetPasswordEmail';
 import ResetPasswordComplete from './pages/resetPasswordComplete';
+import Profile from './pages/profile';
 
 
 function baseRouter(props){
@@ -32,6 +33,9 @@ function baseRouter(props){
           </Route>
           <Route exact path="/phones/" >
             <Phones />
+          </Route>
+          <Route exact path="/profile/" >
+            <Profile />
           </Route>
           <Route exact path="/password/reset/" >
             <ForgotPassword />

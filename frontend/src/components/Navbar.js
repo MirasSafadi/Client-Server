@@ -19,6 +19,7 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
+  
 }));
 
 export default function Navbar(props) {
@@ -68,10 +69,10 @@ export default function Navbar(props) {
           </div>
           {props.isAuthenticated && 
             (
-              <div>
+            <div>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-            <Typography noWrap={true} display="inline" variant="body1" color="inherit" style={{verticalAlign: 'middle'}} >
+              <Grid item xs={12} sm={6} style={{display:'flex'}}>
+            <Typography noWrap={true} display="inline" variant="body1" color="inherit" style={{alignSelf:'center'}} >
               {user.name}
             </Typography>
             </Grid>

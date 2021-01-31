@@ -132,7 +132,7 @@ router.post('/register/verify/', async (req, res, next) => {
     if(ip !== req.ip){
       throw new Error();
     }
-    if(OneDay > date ){ //date is more than 24 hours
+    if(OneDay < date ){ //date is more than 24 hours
       throw new Error();
     }
   } catch(e) {
@@ -239,7 +239,7 @@ router.post('/password/reset/verify/', async (req,res,next) => {
     if(ip !== req.ip){
       throw new Error();
     }
-    if(OneDay > date ){ //date is more than 24 hours
+    if(OneDay < date ){ //date is more than 24 hours
       throw new Error();
     }
     //check if user does not exists...
@@ -312,34 +312,29 @@ router.put('/password/change/', async (req,res,next) => {
 
 
 router.put('/email/change/', async (req,res,next) =>{
-
+  //get old email from req.session.userData
   var email = req.body.email;
-  var first_name = req.body.first_name;
-  var last_name = req.body.last_name;
-  var password = req.body.password;
-  var hashed_password = crypto.createHash('sha256').update(password).digest('hex');
   var ip = req.ip;
 
   var payload = {
-    user: {
+    
+    user: {//add old email
       email: email,
-      first_name: first_name,
-      last_name: last_name,
-      password: hashed_password
     },
     date: new Date(),
     ip: ip
   }
+  //validate new email with regex
 
   var base64 = urlCrypt.cryptObj(payload);
-  var registrationUrl = req.headers.origin + '/email/change/checkLink/' + base64;
+  var emailVerification = req.headers.origin + '/email/change/checkLink/' + base64;
 
   var message = {
     to: email,
-    registrationUrl: registrationUrl
+    emailVerification: emailVerification
   };
 
-  if(await sendMail('registration',message)){
+  if(await sendMail('email-change',message)){
     return res.status(200).send('Email sent successfully!')
   }
   return res.status(500).json({ error: 'Error in sending e-mail' })
@@ -353,22 +348,24 @@ router.put('/email/change/verify/', async (req,res,next) =>{
   //get payload, from payload get new email (payload.new_email)
   //payload will also include old email to check in the database
 });
-router.put('/info/change/', async (req,res,next) =>{
-  //just update in DB
-  var new_email = req.body.email;
-  var id = req.body.id;
-  var userData = req.session.userData;
 
+router.put('/info/change/', async (req,res,next) =>{
+  //req.body will include first_name, last_name, country, city, street, zipCode, phone_number
+  //just update in DB
+  var userData = req.session.userData;
+  //get email from userData => query = {email: userData.email}
+  //validate input
   var newValues = {
     $set: {
       email: new_email,
+      //add the values from the request body
     }
   }
   var query = { ud: id };
 
   let updateResult = await updateRecord(query,newValues)
   if(updateResult){
-    if(await sendMail('email-change')){
+    if(await sendMail('info-change')){
       return res.status(200).send('success');
     }
     return res.status(500).json({error: 'Internal server error!'});
@@ -463,6 +460,25 @@ async function sendMail(type,message){
       //change that to an html page..
       text: "Your email was changed",
       html:  `<center><h1>You changed your email!</h1><br/><h3>You need to <a href="${message.emailVerification}">verify it</a> before you login</h3></center>`,
+    }, (err, info) => {
+      console.log(info);
+      if(err){
+        console.log(err);
+        return false;
+      }
+      
+    });
+    return true;
+  } else if(type === 'info-change'){
+    // send mail with defined transport object
+    transporter.sendMail({
+      from: 'TechShop <csp.techshop3@gmail.com>',
+      to: to,
+      subject: "Your info was changed",
+
+      //change that to an html page..
+      text: "Your info was changed",
+      html:  `<center><h1>You changed your info!</h1><br/><h3>Just letting you know...</h3><p>If you do not remember changing your info go and reset your password.</p></center>`,
     }, (err, info) => {
       console.log(info);
       if(err){
