@@ -13,7 +13,7 @@ const authRoutes = [
 ];
 
 //the secret key to be used in generating and verifying the tokens (for better security, generate a random byte string and store it in a .env file).
-const SECRET_KEY = "CLIENT-SERVER_PROJECT_JWT_SECRET_KEY";
+const SECRET_KEY = "CLIENT-SERVER_PROJECT_JWT_SECRET_KEY"; //this
 
 
 //determine whether or not a new session token is required based on the method and the URL

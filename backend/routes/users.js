@@ -9,6 +9,7 @@ var validators = require('../utils/inputValidators');
 
 
 const MongoClient = require('mongodb').MongoClient;
+//this
 const url = "mongodb+srv://TechShop-Website:130795mrS@techshop-cluster.adibf.mongodb.net/TechShop?retryWrites=true&w=majority";
 
 
@@ -386,8 +387,8 @@ async function sendMail(type,message){
   const to = message.to;
 
   let sender = {
-    email: 'csp.techshop3@gmail.com',
-    password: '159753tS'
+    email: 'csp.techshop3@gmail.com', 
+    password: '159753tS' //this
   }
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
