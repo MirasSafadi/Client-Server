@@ -15,6 +15,7 @@ import { withRouter } from "react-router-dom";
 import UserContext from '../context/user-context';
 import axios from 'axios';
 import * as validators from '../utils/inputValidators';
+import MySnackbar from '../components/snackbar';
 
 
 
@@ -69,7 +70,12 @@ class SignUp extends React.Component {
       lname: '',
       email: '',
       password1: '',
-      password2: ''
+      password2: '',
+
+
+      open: false,
+      severity: '',
+      message: ''
     }
     this.handleChange = this.handleChange.bind(this);
     this.submitForm = this.submitForm.bind(this);
@@ -113,23 +119,43 @@ class SignUp extends React.Component {
     console.log(fname,lname,email, password1,password2)
     //validate input and recaptcha...
     if(value === '[empty]' || this.state.expired){
-      alert('please recheck the CAPTCHA box!')
+      this.setState({
+        open: true,
+        severity: 'error',
+        message: 'please recheck the CAPTCHA box!'
+      })
       return;
     }
     if(!validators.validate(validators.validation_types.NAME,fname)){
-      alert('First name must contain only English letters.');
+      this.setState({
+        open: true,
+        severity: 'error',
+        message: 'First name must contain only English letters.'
+      })
       return;
     }
     if(!validators.validate(validators.validation_types.NAME,lname)){
-      alert('Last name must contain only English letters.');
+      this.setState({
+        open: true,
+        severity: 'error',
+        message: 'Last name must contain only English letters.'
+      })
       return;
     }
     if(!validators.validate(validators.validation_types.EMAIL,email)){
-      alert('Invalid Email.');
+      this.setState({
+        open: true,
+        severity: 'error',
+        message: 'Invalid Email.'
+      })
       return;
     }
     if(password1 !== password2){
-      alert('Passwords do not match.');
+      this.setState({
+        open: true,
+        severity: 'error',
+        message: 'Passwords do not match.'
+      })
       return;
     }
     if(!validators.validate(validators.validation_types.PASSWORD,password1)){
@@ -138,7 +164,11 @@ class SignUp extends React.Component {
                         '• 1 uppercase alphabetical character.\n'+
                         '• 1 numeric character.\n'+
                         '• 6 characters.\n'
-      alert(passAlert);
+      this.setState({
+        open: true,
+        severity: 'error',
+        message: passAlert
+      })
       return;
     }
     
@@ -151,9 +181,14 @@ class SignUp extends React.Component {
     }
     axios.post('http://localhost:8000/users/register/',data)
     .then(() => {
+      
       this.props.history.push('/signup/complete/');
     }).catch(error =>{
-      console.log(error);
+      this.setState({
+        open: true,
+        severity: 'error',
+        message: error.response.data.error
+      })
     });
   }
   render(){
@@ -161,6 +196,7 @@ class SignUp extends React.Component {
     // const { user, setUser } = this.context
     return (
       <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
+        {this.state.open && <MySnackbar severity={this.state.severity} message={this.state.message}/>}
         <CssBaseline />
         <div className={classes.paper}>
           <Avatar className={classes.avatar}>

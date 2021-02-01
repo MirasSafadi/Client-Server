@@ -5,7 +5,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import UserContext from '../context/user-context';
 import * as cookies from '../utils/cookies';
 
@@ -24,9 +24,13 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Navbar(props) {
   const classes = useStyles();
+  const history = useHistory();
 
   // const dispatch = useDispatch();
   const { user, setUser } = useContext(UserContext);
+  let name = '';
+  if(user)
+    name = user.first_name + ' ' + user.last_name;
   return (
     <div className={classes.root}>
       <AppBar position="static">
@@ -81,7 +85,7 @@ export default function Navbar(props) {
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} style={{display:'flex'}}>
             <Typography noWrap={true} display="inline" variant="body1" color="inherit" style={{alignSelf:'center'}} >
-              {user.name}
+              {name}
             </Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -95,15 +99,15 @@ export default function Navbar(props) {
                   } else{
                     cookies.setCookie('token','', -0.5);
                   }
-                  if(localStorage.getItem('name')){
-                    localStorage.removeItem('name');
+                  if(localStorage.getItem('user')){
+                    localStorage.removeItem('user');
                   } else {
-                    cookies.setCookie('name','', -0.5);
+                    cookies.setCookie('user','', -0.5);
                   }
 
-                  const newUser = { token: null, user: { name: null, isAuthenticated: false } }
+                  const newUser = { token: null, isAuthenticated: false, user: { } }
                   setUser(newUser)
-
+                  history.push('/');
             }} >
               <Typography variant="button" color="inherit"  >
                 Logout

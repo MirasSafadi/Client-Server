@@ -72,6 +72,23 @@ class PasswordForm extends React.Component{
         let new_password1 = this.state.new_password1;
         let new_password2 = this.state.new_password2;
         //TODO: input validation
+        if(new_password1 !== new_password2){
+            this.props.showAlert(true,'error','New passwords do not match');
+            return;
+        }
+        if(new_password1 === old_password){
+            this.props.showAlert(true,'error','New password is identical to old password');
+            return;
+        }
+        if(!validators.validate(validators.validation_types.PASSWORD,new_password1)){
+            var passAlert = 'Password must contain at least:\n'+
+                        '• 1 lowercase alphabetical character.\n'+
+                        '• 1 uppercase alphabetical character.\n'+
+                        '• 1 numeric character.\n'+
+                        '• 6 characters.\n';
+            this.props.showAlert(true,'error',passAlert);
+            return;
+        }
         var body = {
             old_password: old_password,
             new_password1: new_password1,
@@ -79,16 +96,15 @@ class PasswordForm extends React.Component{
         }
         axios.put('http://localhost:8000/users/password/change/',body)
         .then(res =>{
-            //TODO: display message
+            this.props.showAlert(true,'success','You\'re password was successfully changed');
         }).catch(error =>{
-            //TODO: display message
+            this.props.showAlert(true,'error',error.response.data.error);
         });
     }
 
 
     render(){
         const { classes } = this.props;
-        const { user, setUser } = this.context
         return (
             <form onSubmit={this.submitForm} id="passwordForm" className={classes.form}>
                 <Grid container spacing={1} direction="column" alignItems="center" justify="center" >

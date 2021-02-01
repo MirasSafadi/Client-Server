@@ -6,23 +6,22 @@ class UserProvider extends Component {
   // Context state
   state = {
     token: localStorage.getItem('token'),
-    user: {  
-      name: localStorage.getItem('name'), 
-      isAuthenticated: !!localStorage.getItem('token'),
-    },
+    isAuthenticated: !!localStorage.getItem('token'),
+    user: JSON.parse(localStorage.getItem('user')),
   }
 
   // Method to update state
   setUser = (newUser) => {
     this.setState({
       token: newUser.token,
+      isAuthenticated: newUser.isAuthenticated,
       user: newUser.user
     })
   }
 
   render() {
     const { children } = this.props
-    const { user, token } = this.state
+    const { user, token, isAuthenticated } = this.state
     const { setUser } = this
 
     return (
@@ -30,6 +29,7 @@ class UserProvider extends Component {
         value={{
           user,
           token,
+          isAuthenticated,
           setUser,
         }}
       >

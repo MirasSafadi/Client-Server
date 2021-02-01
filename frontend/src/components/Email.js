@@ -1,22 +1,9 @@
 import React from 'react';
-import logo from '../logo.svg';
-import '../App.css';
-
 import Button from '@material-ui/core/Button';
-import { withRouter } from 'react-router-dom';
-
 import UserContext from '../context/user-context';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import Avatar from '@material-ui/core/Avatar';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-import Divider from '@material-ui/core/Divider';
 import axios from 'axios';
 import * as validators from '../utils/inputValidators';
 
@@ -54,6 +41,11 @@ class EmailForm extends React.Component{
         this.handleChange = this.handleChange.bind(this);
         this.submitForm = this.submitForm.bind(this);
     }
+    componentDidMount(){
+      this.setState({
+        email: this.context.user.email
+      });
+    }
 
     handleChange(event){
         let name = event.target.name;
@@ -67,19 +59,25 @@ class EmailForm extends React.Component{
     submitForm(event){
         event.preventDefault();
         let email = this.state.email;
-        //TODO: input validation
+        if(!validators.validate(validators.validation_types.EMAIL,email)){
+          this.props.showAlert(true,'error','Invalid email.');
+          return;
+        }
+        if(email === this.context.user.email){
+          this.props.showAlert(true,'error','You need to change the email first');
+          return;
+        }
         axios.put('http://localhost:8000/users/email/change/', {email: email})
         .then(res =>{
-          //TODO: display message for user
+          this.props.showAlert(true,'info','We sent you a verification email. Check your spam if you don\'t see it');
         }).catch(error =>{
-          //TODO: display message for user
+          this.props.showAlert(true,'error',error.response.data.error);
         });
     }
 
 
     render(){
         const { classes } = this.props;
-        const { user, setUser } = this.context
         return (
             <form onSubmit={this.submitForm} id="emailForm" className={classes.form}>
                 <Grid container spacing={1} direction="column" alignItems="center" justify="center" >

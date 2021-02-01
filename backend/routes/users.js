@@ -23,14 +23,15 @@ router.post('/login/', (req, res, next) => {
     if (err) console.log(err);
     var dbo = db.db("TechShop");
 
-    dbo.collection("TechShop_Collection").findOne({ email: email },{ projection: { _id: 0, email: 1, password: 1, first_name: 1, last_name: 1 } }, function(e, result) {
+    dbo.collection("TechShop_Collection").findOne({ email: email },{ projection: { _id: 0, promo_codes: 0 } }, function(e, result) {
       if (e) console.log(e);
       if(result.password === hashed_password){
         var user_info = {
           email: email,
           password: hashed_password,
         };
-        res.status(200).json({token: generateJWTToken(user_info), user: { first_name: result.first_name, last_name: result.last_name }});
+        delete result.password;
+        res.status(200).json({token: generateJWTToken(user_info), user: result });
       } else{
         res.status(406).json({error: 'Cannot login with provided credentials'})
       }
@@ -227,7 +228,7 @@ router.post('/password/reset/verify/', async (req,res,next) => {
   if(!validators.validate(validators.validation_types.PASSWORD,password1)){
     return res.status(403).json({error: 'Invalid Password'});
   }
-
+  var hashed_password = crypto.createHash('sha256').update(password1).digest('hex');
   var payload;
   var user;
 
@@ -251,12 +252,15 @@ router.post('/password/reset/verify/', async (req,res,next) => {
     if(user.password !== payload.user.password){
       throw new Error();
     }
+    if(hashed_password ===  payload.user.password){
+      return res.status(403).json({error: 'New password cannot be identical to old password'});
+    }
   } catch(e) {
     // The link was mangled or tampered with.
     return res.status(400).json({error: 'Corrupted Link!'});
   }
   
-  var hashed_password = crypto.createHash('sha256').update(password1).digest('hex');
+  
   var newValues = {
     $set: {
       password: hashed_password,

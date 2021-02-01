@@ -1,27 +1,17 @@
 import React from 'react';
-import logo from '../logo.svg';
-import '../App.css';
-
-import Button from '@material-ui/core/Button';
 import { withRouter } from 'react-router-dom';
-
-import UserContext from '../context/user-context';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import Avatar from '@material-ui/core/Avatar';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Divider from '@material-ui/core/Divider';
-import axios from 'axios';
-import * as validators from '../utils/inputValidators';
 import InfoForm from '../components/Info';
 import EmailForm from '../components/Email';
 import PasswordForm from '../components/ChangePassword';
+import MySnackbar from '../components/snackbar';
 
 
 const useStyles = theme => ({
@@ -46,16 +36,31 @@ const useStyles = theme => ({
 
 
 class Profile extends React.Component{
-    static contextType = UserContext;
 
-    
+  constructor(props){
+    super(props);
+    this.state ={
+      open: false,
+      severity: '',
+      message: ''
+    }
+    this.showAlert = this.showAlert.bind(this);
+  }
+
+  showAlert(open,severity,message){
+    this.setState({
+      open: open,
+      severity: severity,
+      message: message
+    })
+  }
 
 
     render(){
         const { classes } = this.props;
-        const { user, setUser } = this.context
         return (
             <Container component="main" alignContent="center" maxWidth="sm" style={{ backgroundColor: 'white', borderRadius: 5}}>
+              {this.state.open && <MySnackbar severity={this.state.severity} message={this.state.message}/>}
               <CssBaseline />
               <div className={classes.paper}>
                 <Avatar className={classes.avatar}>
@@ -65,15 +70,15 @@ class Profile extends React.Component{
                   Profile Details
                 </Typography>
                   <Grid container spacing={0} direction="column" alignItems="center" justify="center" >
-                    <EmailForm />
+                    <EmailForm showAlert={this.showAlert}/>
                     <Grid item xs={12}>
                       <Divider />
                     </Grid>
-                    <InfoForm />
+                    <InfoForm showAlert={this.showAlert}/>
                     <Grid item xs={12}> 
                       <Divider />
                     </Grid>
-                    <PasswordForm />
+                    <PasswordForm showAlert={this.showAlert}/>
                   </Grid>
               </div>
               <br/>

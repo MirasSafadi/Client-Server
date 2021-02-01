@@ -20,6 +20,7 @@ import NotFound from './pages/404';
 import Profile from './pages/profile';
 import About from './pages/about';
 import EmailVerification from './pages/emailVerification';
+import UnderConstruction from './pages/underConstruction';
 // import baseRouter from './baseRouter';
 
 
@@ -36,10 +37,10 @@ class App extends React.Component{
   }
 
   render(){
-    const { user } = this.context
+    const { isAuthenticated } = this.context
     return (
       <HOC>
-        <Navbar isAuthenticated={user.isAuthenticated} />
+        <Navbar isAuthenticated={isAuthenticated} />
         
         <Switch>
 
@@ -64,9 +65,7 @@ class App extends React.Component{
           <Route exact path="/phones/" >
             <Phones />
           </Route>
-          <Route exact path="/profile/" >
-            <Profile />
-          </Route>
+          
           <Route exact path="/about/" >
             <About />
           </Route>
@@ -85,10 +84,18 @@ class App extends React.Component{
           <Route exact path="/notfound/">
             <NotFound />
           </Route>
+          <Route exact path="/under_construction/">
+            <UnderConstruction />
+          </Route>
 
-          <AuthRouter isAuthenticated={user.isAuthenticated} path="/" >
+          <AuthRouter isAuthenticated={isAuthenticated} path="/profile/" >
+            <Profile />
+          </AuthRouter>
+
+          <AuthRouter isAuthenticated={isAuthenticated} path="/" >
             <Home />
           </AuthRouter>
+          
 
           <Redirect to="/notfound/" />
 

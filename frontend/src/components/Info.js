@@ -48,6 +48,17 @@ class InfoForm extends React.Component{
         this.handleChange = this.handleChange.bind(this);
         this.submitForm = this.submitForm.bind(this);
     }
+    componentDidMount(){
+      this.setState({
+        first_name: this.context.user.first_name || '',
+        last_name: this.context.user.last_name || '',
+        country: this.context.user.country || '',
+        city: this.context.user.city || '',
+        street: this.context.user.street || '',
+        zipCode: this.context.user.zipCode || '',
+        phone_number: this.context.user.phone_number || '',
+    })
+    }
 
     handleChange(event){
         let name = event.target.name;
@@ -67,7 +78,32 @@ class InfoForm extends React.Component{
         let street = this.state.street;
         let zipCode = this.state.zipCode;
         let phone_number = this.state.phone_number;
-        //TODO: input validation..
+        
+        if(!validators.validate(validators.validation_types.NAME,first_name)){
+          this.props.showAlert(true,'error','Please use only english Character in your name.');
+          return;
+        }
+        if(!validators.validate(validators.validation_types.NAME,last_name)){
+          this.props.showAlert(true,'error','Please use only english Character in your name.');
+          return;
+        }
+        if(!validators.validate(validators.validation_types.NAME,country)){
+          this.props.showAlert(true,'error','Country names can only contain English letters');
+          return;
+        }
+        if(!validators.validate(validators.validation_types.NAME,city)){
+          this.props.showAlert(true,'error','Please use only english Character in your name.');
+          return;
+        }
+        //can't validate street names
+        if(!validators.validate(validators.validation_types.DIGITS,zipCode)){
+          this.props.showAlert(true,'error','Zip code can only contain digits');
+          return;
+        }
+        if(!validators.validate(validators.validation_types.DIGITS,phone_number)){
+          this.props.showAlert(true,'error','Please enter only digits in your phone number');
+          return;
+        }
         var body = {
           first_name: first_name,
           last_name: last_name,
@@ -79,16 +115,15 @@ class InfoForm extends React.Component{
         }
         axios.put('http://localhost:8000/users/info/change/',body)
         .then(res =>{
-          //TODO: display message
+          this.props.showAlert(true,'success','You\'re info was successfully changed');
         }).catch(error =>{
-          //TODO: display message
+          this.props.showAlert(true,'error',error.response.data.error);
         });
     }
 
 
     render(){
         const { classes } = this.props;
-        const { user, setUser } = this.context
         return (
             <form onSubmit={this.submitForm} id="infoForm" className={classes.form}>
                 <Grid container spacing={1}  alignItems="center" justify="center">
@@ -97,7 +132,6 @@ class InfoForm extends React.Component{
                         value={this.state.first_name}
                         name="first_name"
                         variant="outlined"
-                        required
                         size="small"
                         id="firstName"
                         label="First Name"
@@ -110,7 +144,6 @@ class InfoForm extends React.Component{
                         value={this.state.last_name}
                         name="last_name"
                         variant="outlined"
-                        required
                         size="small"
                         id="lastName"
                         label="Last Name"
@@ -123,7 +156,6 @@ class InfoForm extends React.Component{
                         value={this.state.country}
                         name="country"
                         variant="outlined"
-                        required
                         size="small"
                         id="country"
                         label="Country"
@@ -136,7 +168,6 @@ class InfoForm extends React.Component{
                         value={this.state.city}
                         name="city"
                         variant="outlined"
-                        required
                         size="small"
                         id="city"
                         label="City"
@@ -149,7 +180,6 @@ class InfoForm extends React.Component{
                         value={this.state.street}
                         name="street"
                         variant="outlined"
-                        required
                         size="small"
                         id="street"
                         label="Street"
@@ -160,8 +190,8 @@ class InfoForm extends React.Component{
                     <TextField
                         value={this.state.zipCode}
                         name="zipCode"
+                        type="tel"
                         variant="outlined"
-                        required
                         size="small"
                         id="zipCode"
                         label="Zip Code"
@@ -173,7 +203,7 @@ class InfoForm extends React.Component{
                         value={this.state.phone_number}
                         name="phone_number"
                         variant="outlined"
-                        required
+                        type="tel"
                         size="small"
                         id="phoneNumber"
                         label="Phone Number"

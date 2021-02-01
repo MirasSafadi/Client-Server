@@ -28,7 +28,7 @@ class Activation extends React.Component{
                 activated: true
             })
         }).catch(err =>{
-            console.log(err)
+            alert(err.response.data.error)
         })
     }
     

@@ -8,14 +8,14 @@ router.get('/', function(req, res, next) {
     var MongoClient = require('mongodb').MongoClient;
     var url = "mongodb+srv://TechShop-Website:130795mrS@techshop-cluster.adibf.mongodb.net/TechShop?retryWrites=true&w=majority";
 
-    MongoClient.connect(url, function(err, db) {
-      if (err) throw err;
+    MongoClient.connect(url,{ useUnifiedTopology: true }, function(err, db) {
+      if (err) console.log(err);
       var dbo = db.db("TechShop");
-      dbo.collection("TechShop_Collection").find({}).toArray(function(e, result) {
-        if (e) throw e;
-        res.json(result);
+  
+      dbo.collection("TechShop_Collection").findOne({ email: 'safadimiras@gmail.com' },{ projection: { _id: 0, password: 0, promo_codes: 0 } }, function(e, result) {
+        if (e) console.log(e);
+        res.status(200).json({user: result});
         db.close();
-        
       });
     });
 });

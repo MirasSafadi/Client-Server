@@ -11,9 +11,9 @@ import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { withRouter } from "react-router-dom";
-import UserContext from '../context/user-context';
 import axios from 'axios';
 import * as validators from '../utils/inputValidators';
+import MySnackbar from '../components/snackbar';
 
 
 
@@ -51,13 +51,16 @@ const useStyles = theme => ({
 });
 
 class ForgotPasswordVerify extends React.Component {
-  static contextType = UserContext;
 
   constructor(props){
     super(props);
     this.state = {
       password1: '',
-      password2: ''
+      password2: '',
+
+      open: false,
+      severity: '',
+      message: ''
     }
     this.handleChange = this.handleChange.bind(this);
     this.submitForm = this.submitForm.bind(this);
@@ -77,7 +80,11 @@ class ForgotPasswordVerify extends React.Component {
     let base64 = this.props.match.params.base64;
     //input validation..
     if(password1 !== password2){
-      alert('Passwords do not match.');
+      this.setState({
+        open: true,
+        severity: 'error',
+        message: 'Passwords do not match.'
+      })
       return;
     }
     if(!validators.validate(validators.validation_types.PASSWORD,password1)){
@@ -86,7 +93,11 @@ class ForgotPasswordVerify extends React.Component {
                         '• 1 uppercase alphabetical character.\n'+
                         '• 1 numeric character.\n'+
                         '• 6 characters.\n'
-      alert(passAlert);
+      this.setState({
+        open: true,
+        severity: 'error',
+        message: passAlert
+      })
       return;
     }
     var data = {
@@ -98,13 +109,18 @@ class ForgotPasswordVerify extends React.Component {
     .then(res =>{
         this.props.history.push('/password/reset/success/')
     }).catch(err =>{
-
+      this.setState({
+        open: true,
+        severity: 'error',
+        message: err.response.data.error
+      })
     })
   }
   render(){
     const { classes } = this.props;
     return (
       <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
+        {this.state.open && <MySnackbar severity={this.state.severity} message={this.state.message}/>}
         <CssBaseline />
         <div className={classes.paper}>
           <Avatar className={classes.avatar}>

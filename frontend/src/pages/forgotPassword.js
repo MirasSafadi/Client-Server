@@ -14,6 +14,7 @@ import { withRouter } from "react-router-dom";
 import UserContext from '../context/user-context';
 import axios from 'axios';
 import * as validators from '../utils/inputValidators';
+import MySnackbar from '../components/snackbar';
 
 
 function Copyright() {
@@ -56,6 +57,10 @@ class ForgotPassword extends React.Component {
     super(props);
     this.state = {
       email: '',
+
+      open: false,
+      severity: '',
+      message: ''
     }
     this.handleChange = this.handleChange.bind(this);
     this.submitForm = this.submitForm.bind(this);
@@ -80,7 +85,11 @@ class ForgotPassword extends React.Component {
       .then(()=>{
           this.props.history.push('/password/reset/complete/');
       }).catch(err => {
-          alert(err.data);
+        this.setState({
+          open: true,
+          severity: 'error',
+          message: err.response.data.error
+        })
       });
 
   }
@@ -88,6 +97,7 @@ class ForgotPassword extends React.Component {
     const { classes } = this.props;
     return (
       <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
+        {this.state.open && <MySnackbar severity={this.state.severity} message={this.state.message}/>}
         <CssBaseline />
         <div className={classes.paper}>
           <Avatar className={classes.avatar}>

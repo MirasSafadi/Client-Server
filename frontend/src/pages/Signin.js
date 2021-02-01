@@ -16,6 +16,7 @@ import { withRouter } from "react-router-dom";
 import UserContext from '../context/user-context';
 import axios from 'axios';
 import * as cookies from '../utils/cookies';
+import MySnackbar from '../components/snackbar';
 
 function Copyright() {
   return (
@@ -59,7 +60,11 @@ class SignIn extends React.Component{
     this.state = {
       email: '',
       password: '',
-      rememberMe: false
+      rememberMe: false,
+
+      open: false,
+      severity: '',
+      message: ''
     }
     this.handleChange = this.handleChange.bind(this);
     this.submitForm = this.submitForm.bind(this);
@@ -94,28 +99,32 @@ class SignIn extends React.Component{
     .then(res => {
         const token = res.data.token;
         const user = res.data.user;
-        const name = user.first_name + ' ' + user.last_name;
         if(rememberMe === 'true'){
             localStorage.setItem('token', token);
-            localStorage.setItem('name',name);
+            localStorage.setItem('user',JSON.stringify(user));
         } else{
             cookies.setCookie('token',token, 0.5);
-            cookies.setCookie('name',name, 0.5);
+            cookies.setCookie('user',JSON.stringify(user), 0.5);
         }
-        this.context.setUser({ token: token, user: {name: name, isAuthenticated: true} });
+        this.context.setUser({ token: token, isAuthenticated: true, user: user });
         //push history to homepage.
         this.props.history.push('/');
     })
     .catch(err => {
-        console.log(err)
+        this.setState({
+          open: true,
+          severity: 'error',
+          message: err.response.data.error
+        })
     });
   }
 
   render(){
     const { classes } = this.props;
-    const { user, setUser } = this.context
     return (
+      <div>
       <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
+      {this.state.open && <MySnackbar severity={this.state.severity} message={this.state.message}/>}
         <CssBaseline />
         <div className={classes.paper}>
           <Avatar className={classes.avatar}>
@@ -184,7 +193,10 @@ class SignIn extends React.Component{
           <Copyright />
         </Box>
         <br/>
+        
       </Container>
+      
+      </div>
     );
   }
 }

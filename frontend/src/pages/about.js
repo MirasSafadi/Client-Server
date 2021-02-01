@@ -7,6 +7,8 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import Miras from '../assets/Miras.png';
+import jeries from '../assets/jeries.png';
 
 const useStyles = makeStyles({
   root: {
@@ -17,74 +19,69 @@ const useStyles = makeStyles({
   },
 });
 
-const img = require.context('../assets/', false);
-const miras = 'Miras.jpeg';
-const jeries = 'jeries.jpg';
 
-const styles = {
-    media: {
-      height: 0,
-      paddingTop: '56.25%', // 16:9,
-      marginTop:'30'
-    }
-};
 
 export default function About() {
   const classes = useStyles();
 
   return (
+    <div style={{textAlign:'center'}}>
+      <Typography variant="h2" component="h2" style={{color: 'white', fontFamily: 'cursive'}}>
+        About us
+      </Typography>
     <div className="d-flex align-content-center flex-wrap justify-content-center">
+        
         <div style={{margin: 10}}>
-            <Card className={classes.root}>
+            <Card className={classes.root} elevation={10}>
               <CardActionArea>
                 <CardMedia
                   className={classes.media}
-                  image={require('../assets/Miras.jpeg')}
-                  style={styles.media}
-                //   image={img(`./${miras}`)}
-                  title="Contemplative Reptile"
+                  image={Miras}
+                  style={{ height: 400 }}
+                  title="Miras Safadi"
                 />
                 <CardContent>
                   <Typography gutterBottom variant="h5" component="h2">
                     Miras Safadi
                   </Typography>
                   <Typography variant="body2" color="textSecondary" component="p">
-                    A software engineer with passion to code and seek new knowledge
+                    A software engineer with passion to code and seek new knowledge.
                   </Typography>
                 </CardContent>
               </CardActionArea>
               <CardActions>
-                <Button size="small" color="primary" >
+                <Button size="small" color="primary" onClick={() =>{ window.open('mailto:safadimiras@gmail.com')}}>
                   Email me
                 </Button>
               </CardActions>
             </Card>
         </div>
         <div style={{margin: 10}}>
-            <Card className={classes.root}>
+            <Card className={classes.root} elevation={10}>
               <CardActionArea>
                 <CardMedia
                   className={classes.media}
-                  style={{ height: 0, paddingTop: '56%'}}
-                  image={img(`./${jeries}`)}
-                  title="Contemplative Reptile"
+                  image={jeries}
+                  style={{ height: 400 }}
+                  title="Jeries Haddad"
                 />
                 <CardContent>
                   <Typography gutterBottom variant="h5" component="h2">
                     Jeries Haddad
                   </Typography>
                   <Typography variant="body2" color="textSecondary" component="p">
-                    A software Developer at Nvidia with passion to code and 
+                    A software Developer at Nvidia with passion to code and a thrive to be knowledgeful.
                   </Typography>
                 </CardContent>
               </CardActionArea>
               <CardActions>
-                <Button size="small" color="primary">
+                <Button size="small" color="primary" onClick={() =>{ window.open('mailto:jerieshaddad115@gmail.com')}}>
                   Email Me
                 </Button>
               </CardActions>
             </Card>
         </div>
+    </div>
     </div>
   );
 }

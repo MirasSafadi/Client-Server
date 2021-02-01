@@ -4,37 +4,15 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { createStore, compose, applyMiddleware } from 'redux';
-import { Provider } from 'react-redux';
-import thunk from 'redux-thunk';
-import history from './utils/history';
 import { UserProvider } from './context/user-context';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import authReducer from './store/reducers/auth';
 
-const composeEnhances = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
-
-const store = createStore(authReducer, composeEnhances(
-    applyMiddleware(thunk)
-));
 
 const user = {
   token: localStorage.getItem('token'),
-  user: {
-    name: null, 
-    isAuthenticated: !!localStorage.getItem('token')
-  }
+  isAuthenticated: !!localStorage.getItem('token'),
+  user: JSON.parse(localStorage.getItem('user')),
 };
-
-//using react-redux
-// ReactDOM.render(
-//     <Provider store={store}>
-//       <Router>
-//         <App />
-//       </Router>
-//     </Provider>,
-//   document.getElementById('root')
-// );
 
 //using react context
 ReactDOM.render(
