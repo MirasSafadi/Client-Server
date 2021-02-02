@@ -51,6 +51,9 @@ class App extends React.Component{
           <Route exact path="/signup/" >
             <SignUp />
           </Route>
+          <Route exact path="/signup" >
+            <SignUp />
+          </Route>
           <Route exact path="/signup/complete/" >
             <RegistrationComplete />
           </Route>
@@ -65,6 +68,9 @@ class App extends React.Component{
             <About />
           </Route>
           <Route exact path="/password/reset/" >
+            <ForgotPassword />
+          </Route>
+          <Route exact path="/password/reset" >
             <ForgotPassword />
           </Route>
           <Route exact path="/password/reset/verify/:base64/" >

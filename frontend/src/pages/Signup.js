@@ -179,7 +179,7 @@ class SignUp extends React.Component {
       password1: password1,
       password2: password2
     }
-    axios.post('users/register/',data)
+    axios.post('/users/register/',data)
     .then(() => {
       
       this.props.history.push('/signup/complete/');

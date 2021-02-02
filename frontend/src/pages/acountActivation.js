@@ -22,7 +22,7 @@ class Activation extends React.Component{
     componentDidMount(){
         //take the crypt message from the url and send it back to server.
         //when the server responds with ok display the message.
-        axios.post('users/register/verify/',this.props.match.params)
+        axios.post('/users/register/verify/',this.props.match.params)
         .then(res => {
             this.setState({
                 activated: true

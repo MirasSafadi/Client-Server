@@ -117,7 +117,7 @@ class InfoForm extends React.Component{
           "Content-Type": "application/json",
           Authorization: `Token ${this.context.token}`
         }
-        axios.put('users/info/change/',body)
+        axios.put('/users/info/change/',body)
         .then(res =>{
           this.props.showAlert(true,'success','You\'re info was successfully changed');
         }).catch(error =>{

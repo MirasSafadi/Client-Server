@@ -81,7 +81,7 @@ class ForgotPassword extends React.Component {
         alert('Invalid Email.');
         return;
       }
-      axios.post('users/password/reset/',{ email: email})
+      axios.post('/users/password/reset/',{ email: email})
       .then(()=>{
           this.props.history.push('/password/reset/complete/');
       }).catch(err => {

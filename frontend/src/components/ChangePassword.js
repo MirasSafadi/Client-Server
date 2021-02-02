@@ -98,7 +98,7 @@ class PasswordForm extends React.Component{
           "Content-Type": "application/json",
           Authorization: `Token ${this.context.token}`
         }
-        axios.put('users/password/change/',body)
+        axios.put('/users/password/change/',body)
         .then(res =>{
             this.props.showAlert(true,'success','You\'re password was successfully changed');
         }).catch(error =>{
