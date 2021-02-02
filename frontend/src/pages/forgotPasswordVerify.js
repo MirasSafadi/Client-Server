@@ -116,11 +116,18 @@ class ForgotPasswordVerify extends React.Component {
       })
     })
   }
+  closeAlert(){
+    this.setState({
+      open: false,
+      severity: '',
+      message: ''
+    })
+  }
   render(){
     const { classes } = this.props;
     return (
       <Container component="main" maxWidth="xs" style={{ backgroundColor: 'white', borderRadius: 5}}>
-        {this.state.open && <MySnackbar severity={this.state.severity} message={this.state.message}/>}
+        {this.state.open && <MySnackbar severity={this.state.severity} message={this.state.message} close={this.closeAlert.bind(this)}/>}
         <CssBaseline />
         <div className={classes.paper}>
           <Avatar className={classes.avatar}>
@@ -163,7 +170,7 @@ class ForgotPasswordVerify extends React.Component {
               color="primary"
               className={classes.submit}
             >
-              Send me a link
+              Reset
             </Button>
           </form>
         </div>

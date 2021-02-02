@@ -27,15 +27,6 @@ import UnderConstruction from './pages/underConstruction';
 class App extends React.Component{
   static contextType = UserContext;
 
-  componentDidMount(){
-    // console.log(localStorage.getItem('token'))
-    // console.log(this.props.isAuthenticated);
-    const context = this.context
-    console.log(context)
-    console.log(context.user) // { token: null, user: { name: null, isAuthenticated: false } }
-    console.log(context.token) // { token: null, user: { name: null, isAuthenticated: false } }
-  }
-
   render(){
     const { isAuthenticated } = this.context
     return (
@@ -43,6 +34,10 @@ class App extends React.Component{
         <Navbar isAuthenticated={isAuthenticated} />
         
         <Switch>
+
+          <Route exact path="/" >
+            <Home />
+          </Route>
 
           <Route exact path="/login/" >
             <SignIn />
@@ -92,9 +87,7 @@ class App extends React.Component{
             <Profile />
           </AuthRouter>
 
-          <AuthRouter isAuthenticated={isAuthenticated} path="/" >
-            <Home />
-          </AuthRouter>
+          
           
 
           <Redirect to="/notfound/" />

@@ -113,6 +113,10 @@ class InfoForm extends React.Component{
           zipCode: zipCode,
           phone_number: phone_number
         }
+        axios.defaults.headers = {
+          "Content-Type": "application/json",
+          Authorization: `Token ${this.context.token}`
+        }
         axios.put('http://localhost:8000/users/info/change/',body)
         .then(res =>{
           this.props.showAlert(true,'success','You\'re info was successfully changed');

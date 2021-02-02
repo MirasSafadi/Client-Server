@@ -40,7 +40,7 @@ export default function Navbar(props) {
           <Link to="/" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
               <Button variant="text" color="inherit">
                 <Typography variant="button" color="inherit">
-                  Dashboard
+                  Home
                 </Typography>
               </Button>
           </Link>
@@ -79,7 +79,7 @@ export default function Navbar(props) {
             </Link>)
           }
           </div>
-          {props.isAuthenticated && 
+          {props.isAuthenticated? 
             (
             <div>
             <Grid container spacing={2}>
@@ -116,6 +116,18 @@ export default function Navbar(props) {
             </Grid>
             </Grid>
             </div>)
+            :
+            (
+              <div>
+              <Link to="/login/" style={{ textDecoration: 'none', margin: 8, color: 'white'}}>
+              <Button variant="text" color="inherit">
+                <Typography variant="button" color="inherit">
+                  Login
+                </Typography>
+                
+              </Button>
+            </Link>
+              </div>)
           }
 
         </Toolbar>

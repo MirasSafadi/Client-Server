@@ -50,7 +50,7 @@ app.use(async (req, res, next) => {
     let authHeader = req.header('Authorization');
     let sessionID = authHeader.split(' ')[1];
     if (sessionID) {
-      let userData = verifyToken(sessionID);
+      let userData = authUtils.verifyToken(sessionID);
       if (userData) {
         req.session.userData = userData;
         req.session.sessionID = sessionID;

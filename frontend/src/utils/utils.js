@@ -20,30 +20,30 @@ export const getToken = () =>{
 
 export const getComputers = () =>{
     return [
-        {name: 'iMac', description:'Very powerful but not for gaming!',photo: imac},
-        {name: 'Macbook Pro', description:'State of the art Apple technology!',photo: macbook},
-        {name: 'Lenovo Yoga', description:'This is a computer for gaming!',photo: lenovo},
-        {name: 'Dell', description:'Does the job well.', photo: dell}
+        {id: 1,name: 'iMac', description:'Very powerful but not for gaming!',photo: imac},
+        {id: 2,name: 'Macbook Pro', description:'State of the art Apple technology!',photo: macbook},
+        {id: 3,name: 'Lenovo Yoga', description:'This is a computer for gaming!',photo: lenovo},
+        {id: 4,name: 'Dell', description:'Does the job well.', photo: dell}
     ]
 }
 export const getPhones = () =>{
     return [
-        {name: 'iPhone XS', description:'Very secure, CIA approved!',photo: iphone},
-        {name: 'Samsung Galaxy S9', description:'If you want to buy another phone in 1 month, then buy this one now.',photo: galaxy},
-        {name: 'HTC U11', description:'No idea what this does!',photo: htc},
-        {name: 'Xiaomi Redmi', description:'iPhone copycat.', photo: xiaomi}
+        {id: 1,name: 'iPhone XS', description:'Very secure, CIA approved!',photo: iphone},
+        {id: 2,name: 'Samsung Galaxy S9', description:'If you want to buy another phone in 1 month, then buy this one now.',photo: galaxy},
+        {id: 3,name: 'HTC U11', description:'No idea what this does!',photo: htc},
+        {id: 4,name: 'Xiaomi Redmi', description:'iPhone copycat.', photo: xiaomi}
     ]
 }
 
 export const getAllProducts = () =>{
     return [
-        {name: 'iMac', description:'Very powerful but not for gaming!',photo: imac},
-        {name: 'Macbook Pro', description:'State of the art Apple technology!',photo: macbook},
-        {name: 'Lenovo Yoga', description:'This is a computer for gaming!',photo: lenovo},
-        {name: 'Dell', description:'Does the job well.', photo: dell},
-        {name: 'iPhone XS', description:'Very secure, CIA approved!',photo: iphone},
-        {name: 'Samsung Galaxy S9', description:'If you want to buy another phone in 1 month, then buy this one now.',photo: galaxy},
-        {name: 'HTC U11', description:'No idea what this does!',photo: htc},
-        {name: 'Xiaomi Redmi', description:'iPhone copycat.', photo: xiaomi}
+        {id: 1, name: 'iMac', description:'Very powerful but not for gaming!',photo: imac},
+        {id: 2, name: 'Macbook Pro', description:'State of the art Apple technology!',photo: macbook},
+        {id: 3, name: 'Lenovo Yoga', description:'This is a computer for gaming!',photo: lenovo},
+        {id: 4, name: 'Dell', description:'Does the job well.', photo: dell},
+        {id: 5, name: 'iPhone XS', description:'Very secure, CIA approved!',photo: iphone},
+        {id: 6, name: 'Samsung Galaxy S9', description:'If you want to buy another phone in 1 month, then buy this one now.',photo: galaxy},
+        {id: 7, name: 'HTC U11', description:'No idea what this does!',photo: htc},
+        {id: 8, name: 'Xiaomi Redmi', description:'iPhone copycat.', photo: xiaomi}
     ]
 }

@@ -25,7 +25,7 @@ function Phones() {
   const classes = useStyles();
   const history = useHistory();
   const phones = getPhones().map(phone => (
-    <div style={{margin: 10}}>
+    <div key={phone.id} style={{margin: 10}}>
         <Card className={classes.root} elevation={10}>
           <CardActionArea>
             <CardMedia

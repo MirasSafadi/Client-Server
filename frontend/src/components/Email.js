@@ -67,6 +67,10 @@ class EmailForm extends React.Component{
           this.props.showAlert(true,'error','You need to change the email first');
           return;
         }
+        axios.defaults.headers = {
+          "Content-Type": "application/json",
+          Authorization: `Token ${this.context.token}`
+        }
         axios.put('http://localhost:8000/users/email/change/', {email: email})
         .then(res =>{
           this.props.showAlert(true,'info','We sent you a verification email. Check your spam if you don\'t see it');

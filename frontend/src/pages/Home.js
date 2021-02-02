@@ -25,7 +25,7 @@ function Home() {
     const classes = useStyles();
     const history = useHistory();
     const products = getAllProducts().map(product => (
-      <div style={{margin: 10}}>
+      <div key={product.id}style={{margin: 10}}>
           <Card className={classes.root} elevation={10}>
             <CardActionArea>
               <CardMedia

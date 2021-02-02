@@ -60,10 +60,10 @@ router.post('/register/', async (req, res, next) => {
 
   
   //input validation...
-  if(!validators.validate(validators.validation_types.NAME,fname) || fname === ''){
+  if(!validators.validate(validators.validation_types.NAME,first_name) || first_name === ''){
     return res.status(403).json({error: 'First name must contain only English letters.'});
   }
-  if(!validators.validate(validators.validation_types.NAME,lname) || lname === ''){
+  if(!validators.validate(validators.validation_types.NAME,last_name) || last_name === ''){
     return res.status(403).json({error: 'Last name must contain only English letters.'});
   }
   if(!validators.validate(validators.validation_types.EMAIL,email) || email === ''){
@@ -239,18 +239,23 @@ router.post('/password/reset/verify/', async (req,res,next) => {
     var ip = payload.ip;
     var date = payload.date;
     if(ip !== req.ip){
+      console.log('1')
       throw new Error();
     }
     if(OneDay < date ){ //date is more than 24 hours
+      console.log('2')
       throw new Error();
     }
     //check if user does not exists...
     var userExists = await exists({email: payload.user.email});
     if(!userExists){
+      console.log('3')
       throw new Error();
     }
     user = await findRecord({email: payload.user.email});
     if(user.password !== payload.user.password){
+      console.log(user,payload.user)
+      console.log('4')
       throw new Error();
     }
     if(hashed_password ===  payload.user.password){
@@ -270,7 +275,7 @@ router.post('/password/reset/verify/', async (req,res,next) => {
   var query = { email: user.email };
   let updateResult = await updateRecord(query,newValues)
   if(updateResult){
-    if(await sendMail('password-change')){
+    if(await sendMail('password-change',{ to: user.email})){
       return res.status(200).send('success');
     }
     return res.status(500).json({error: 'Internal server error!'});
@@ -304,10 +309,10 @@ router.put('/password/change/', async (req,res,next) => {
       password: hashed_new_password,
     }
   }
-  var query = { email: user.email };
+  var query = { email: userData.email };
   let updateResult = await updateRecord(query,newValues)
   if(updateResult){
-    if(await sendMail('password-change')){
+    if(await sendMail('password-change',{ to: userData.email })){
       return res.status(200).send('success');
     }
     return res.status(500).json({error: 'Internal server error!'});
@@ -318,7 +323,7 @@ router.put('/password/change/', async (req,res,next) => {
 
 router.put('/email/change/', async (req,res,next) =>{
   var email = req.body.email;
-  var old_email = req.session.email;
+  var old_email = req.session.userData.email;
   var ip = req.ip;
 
   var payload = {
@@ -358,42 +363,37 @@ router.put('/email/change/verify/', async (req,res,next) =>{
 
   var base64 = req.body.base64;
   var payload;
-  var user;
 
   try {
     var OneDay = new Date().getTime() + (1 * 24 * 60 * 60 * 1000);
     payload =  urlCrypt.decryptObj(base64);
     var ip = payload.ip;
     var date = payload.date;
-    var new_email = payload.new_email;
-    var old_email = payload.old_email;
+    var new_email = payload.user.email;
+    var old_email = payload.user.old_email;
     if(ip !== req.ip){
+      console.log('1')
       throw new Error();
     }
     if(OneDay < date ){ //date is more than 24 hours
+      console.log('2')
       throw new Error();
     }
     //check if user does not exists...
     var userExists = await exists({email: old_email});
     if(!userExists){
-      throw new Error();
-    }
-    user = await findRecord({email: old_email});
-    if(user.password !== payload.user.password){
+      console.log('3')
       throw new Error();
     }
     var newValues = {
       $set: {
-        email = new_email,
+        email: new_email,
       }
     }
-    var query = {user: user};
+    var query = {email: old_email};
     let updateResult = await updateRecord(query,newValues)
     if(updateResult){
-      if(await sendMail('email-change')){
-        return res.status(200).send('success');
-      }
-      return res.status(500).json({error: 'Internal server error!'});
+      return res.status(200).send('success');
     }
   } catch(e) {
     // The link was mangled or tampered with.
@@ -407,6 +407,7 @@ router.put('/info/change/', async (req,res,next) =>{
   //get email from userData => query = {email: userData.email}
   var userData = req.session.userData;
   var email = userData.email;
+
   var first_name = req.body.first_name;
   var last_name = req.body.last_name;
   var country = req.body.country;
@@ -428,9 +429,6 @@ router.put('/info/change/', async (req,res,next) =>{
   }
   if(!validators.validate(validators.validation_types.NAME,city)){
     return res.status(403).json({error: 'Invalid City'});
-  }
-  if(!validators.validate(validators.validation_types.NAME,street)){
-    return res.status(403).json({error: 'Invalid Street'});
   }
   if(!validators.validate(validators.validation_types.DIGITS,zipCode)){
     return res.status(403).json({error: 'Invalid ZIP Code'});
@@ -454,7 +452,7 @@ router.put('/info/change/', async (req,res,next) =>{
 
   let updateResult = await updateRecord(query,newValues)
   if(updateResult){
-    if(await sendMail('info-change')){
+    if(await sendMail('info-change',{to: email})){
       return res.status(200).send('success');
     }
     return res.status(500).json({error: 'Internal server error!'});

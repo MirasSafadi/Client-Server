@@ -25,7 +25,7 @@ function Computers() {
     const classes = useStyles();
     const history = useHistory();
     const computers = getComputers().map(computer => (
-      <div style={{margin: 10}}>
+      <div key={computer.id} style={{margin: 10}}>
           <Card className={classes.root} elevation={10}>
             <CardActionArea>
               <CardMedia
