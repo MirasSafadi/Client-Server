@@ -19,13 +19,13 @@ router.post('/login/', (req, res, next) => {
   var email = req.body.email;
   var password = req.body.password;
   var hashed_password = crypto.createHash('sha256').update(password).digest('hex');
-
+  console.log('here',req.body)
   MongoClient.connect(url,{ useUnifiedTopology: true }, function(err, db) {
-    if (err) console.log(err);
+    if (err) return res.status(406).json({error: 'Cannot login with provided credentials'});
     var dbo = db.db("TechShop");
 
     dbo.collection("TechShop_Collection").findOne({ email: email },{ projection: { _id: 0, promo_codes: 0 } }, function(e, result) {
-      if (e) console.log(e);
+      if (e) return res.status(406).json({error: 'Cannot login with provided credentials'});
       if(result.password === hashed_password){
         var user_info = {
           email: email,
