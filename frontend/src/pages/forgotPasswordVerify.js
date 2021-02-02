@@ -105,7 +105,7 @@ class ForgotPasswordVerify extends React.Component {
         password1: password1,
         password2: password2
     }
-    axios.post('http://localhost:8000/users/password/reset/verify/',data)
+    axios.post('users/password/reset/verify/',data)
     .then(res =>{
         this.props.history.push('/password/reset/success/')
     }).catch(err =>{

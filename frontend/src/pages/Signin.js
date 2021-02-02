@@ -92,7 +92,7 @@ class SignIn extends React.Component{
       return;
     }
     // this.props.authLogin(email,password,rememberMe);
-    axios.post('http://localhost:8000/users/login/', {
+    axios.post('users/login/', {
         email: email,
         password: password
     })
