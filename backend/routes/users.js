@@ -317,19 +317,23 @@ router.put('/password/change/', async (req,res,next) => {
 
 
 router.put('/email/change/', async (req,res,next) =>{
-  //get old email from req.session.userData
   var email = req.body.email;
+  var old_email = req.session.email;
   var ip = req.ip;
 
   var payload = {
     
-    user: {//add old email
+    user: {//add old email  //********************* */
+      old_email: old_email,
       email: email,
     },
     date: new Date(),
     ip: ip
   }
   //validate new email with regex
+  if(!validators.validate(validators.validation_types.EMAIL,email)){
+    return res.status(403).json({error: 'Invalid E-Mail'});
+  }
 
   var base64 = urlCrypt.cryptObj(payload);
   var emailVerification = req.headers.origin + '/email/change/checkLink/' + base64;
@@ -347,26 +351,106 @@ router.put('/email/change/', async (req,res,next) =>{
 });
 
 router.put('/email/change/verify/', async (req,res,next) =>{
-  var base64 = req.body.base64;
   /** TODO:  */
   //decrypt object
   //get payload, from payload get new email (payload.new_email)
   //payload will also include old email to check in the database
+
+  var base64 = req.body.base64;
+  var payload;
+  var user;
+
+  try {
+    var OneDay = new Date().getTime() + (1 * 24 * 60 * 60 * 1000);
+    payload =  urlCrypt.decryptObj(base64);
+    var ip = payload.ip;
+    var date = payload.date;
+    var new_email = payload.new_email;
+    var old_email = payload.old_email;
+    if(ip !== req.ip){
+      throw new Error();
+    }
+    if(OneDay < date ){ //date is more than 24 hours
+      throw new Error();
+    }
+    //check if user does not exists...
+    var userExists = await exists({email: old_email});
+    if(!userExists){
+      throw new Error();
+    }
+    user = await findRecord({email: old_email});
+    if(user.password !== payload.user.password){
+      throw new Error();
+    }
+    var newValues = {
+      $set: {
+        email = new_email,
+      }
+    }
+    var query = {user: user};
+    let updateResult = await updateRecord(query,newValues)
+    if(updateResult){
+      if(await sendMail('email-change')){
+        return res.status(200).send('success');
+      }
+      return res.status(500).json({error: 'Internal server error!'});
+    }
+  } catch(e) {
+    // The link was mangled or tampered with.
+    return res.status(400).json({error: 'Corrupted Link!'});
+  }
 });
 
 router.put('/info/change/', async (req,res,next) =>{
   //req.body will include first_name, last_name, country, city, street, zipCode, phone_number
   //just update in DB
-  var userData = req.session.userData;
   //get email from userData => query = {email: userData.email}
+  var userData = req.session.userData;
+  var email = userData.email;
+  var first_name = req.body.first_name;
+  var last_name = req.body.last_name;
+  var country = req.body.country;
+  var city = req.body.city;
+  var street = req.body.street;
+  var zipCode = req.body.zipCode;
+  var phone_number = req.body.phone_number;
+  
+
   //validate input
+  if(!validators.validate(validators.validation_types.NAME,first_name)){
+    return res.status(403).json({error: 'Invalid First Name'});
+  }
+  if(!validators.validate(validators.validation_types.NAME,last_name)){
+    return res.status(403).json({error: 'Invalid Last Name'});
+  } 
+  if(!validators.validate(validators.validation_types.NAME,country)){
+    return res.status(403).json({error: 'Invalid Country'});
+  }
+  if(!validators.validate(validators.validation_types.NAME,city)){
+    return res.status(403).json({error: 'Invalid City'});
+  }
+  if(!validators.validate(validators.validation_types.NAME,street)){
+    return res.status(403).json({error: 'Invalid Street'});
+  }
+  if(!validators.validate(validators.validation_types.DIGITS,zipCode)){
+    return res.status(403).json({error: 'Invalid ZIP Code'});
+  }
+  if(!validators.validate(validators.validation_types.DIGITS,phone_number)){
+    return res.status(403).json({error: 'Invalid Phone Number'});
+  }
+
   var newValues = {
     $set: {
-      email: new_email,
-      //add the values from the request body
+      first_name: first_name,
+      last_name: last_name,
+      country: country,
+      city: city,
+      street: street,
+      zipCode: zipCode,
+      phone_number: phone_number,
     }
   }
-  var query = { ud: id };
+  var query = { email: email };
 
   let updateResult = await updateRecord(query,newValues)
   if(updateResult){
@@ -377,10 +461,6 @@ router.put('/info/change/', async (req,res,next) =>{
   }
   return res.status(500).json({error: 'Internal server error!'});
 });
-
-
-
-
 
 
 async function sendMail(type,message){
